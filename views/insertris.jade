@@ -1,0 +1,38 @@
+//
+   Created by Daniele on 28/08/2015.
+
+extends layout
+block content
+    script(src='/javascript/insris.js')
+    h1.text-left Inserimento risultati per #{descr}
+    div.alert.alert-danger
+        a.close(href='#',data-dismiss='alert', aria-label='close') &times;
+        | <strong> Attenzione </strong> Bisogna correggere prima di inviare
+    div.alert.alert-success
+        a.close(href='#',data-dismiss='alert', aria-label='close') &times;
+        |<strong> Successo </strong> Salvataggio completo
+block mainbar
+    form(name='compila',id="compila" , method='post')
+        table.table-bordered
+            thead
+                tr
+                    th Squadra 1
+                    th Squadra 2
+                    th Gol 1
+                    th Gol 2
+                    th Segno
+            tbody
+                - each item in list
+                    tr
+                        td= item.sq_home
+                        td= item.sq_away
+                        td
+                            input.G1(type="text" , name="G1-#{item.cod_partita}", value="#{item.g_home}")
+                        td
+                            input.G2(type="text" , name="G2-#{item.cod_partita}", value="#{item.g_away}")
+                        td
+                            input.G3(type="text" , name="G3-#{item.cod_partita}", value="#{item.segno}", disabled)
+
+block mainleft
+    div.btn-group-vertical
+        button.btn.btn-success#btnSubmit(type="button", value="Salva", onclick='validate()') Salva

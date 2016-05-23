@@ -1,0 +1,49 @@
+//
+   Created by Schiappacassed on 19/09/2015.
+
+extends layout
+block content
+    script(src='/javascript/gestsq.js')
+    h1.text-left Opzioni
+    div.alert.alert-danger
+        a.close(href='#',data-dismiss='alert', aria-label='close') &times;
+        |<strong> Attenzione </strong> Bisogna correggere prima di inviare
+    div.alert.alert-success
+        a.close(href='#',data-dismiss='alert', aria-label='close') &times;
+        |<strong> Successo </strong> Salvataggio completo
+block mainleft
+    form(name='cambia',id="cambia" , method='post', action='/gestsq')
+        table.table
+            tbody
+                tr
+                    td Nome Squadra
+                    td
+                        input.G1(type="text" , name="G1", value="#{user.SQ_NOME_SQUADRA}")
+                    td
+                        button.btn.btn-success#btnSubmit(type="button", value="Salva", onclick='validate1()') Salva
+                tr
+                    td Immagine Squadra
+                    td
+                        if user.SQ_IMAGE
+                            img.img-thumbnail(src="/img/team/#{user.SQ_IMAGE}",width="50", height="65")
+                        else
+                            i.fa.fa-shield.fa-5x(style="color:blue")
+                    td
+                        a.btn.btn-success#btnSubmit(href="/cimg") Cambia
+                tr
+                    td Email
+                    td
+                        input.G3(type="email" , name="G3", value="#{user.SQ_MAIL}")
+                    td
+                        button.btn.btn-success#btnSubmit(type="button", value="Salva", onclick='validate3()') Salva
+                tr
+                    td Promemoria
+                    td
+                        if(user.SQ_AVVISO)
+                            input.G4(type="checkbox" , name="G3", value="Attiva",checked=true)
+                        else
+                            input.G4(type="checkbox" , name="G3", value="Attiva")
+                    td
+                        button.btn.btn-success#btnSubmit(type="button", value="Salva", onclick='validate3()') Salva
+    div.btn-group-vertical
+        a.btn.btn-info(href="/utente") Principale

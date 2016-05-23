@@ -1,0 +1,68 @@
+//
+   Created by Daniele on 11/08/2015.
+
+extends layout
+block content
+    script(src='/javascript/comptab.js')
+    h1 Compilazione risultati
+    input(type='hidden', name='torneo', value="#{cod_torneo}")
+    input(type='hidden', name='giorn', value="#{nro_giorn}")
+    div.alert.alert-danger
+        a.close(href='#',data-dismiss='alert', aria-label='close') &times;
+        |<strong> Attenzione </strong> Bisogna correggere prima di inviare
+    div.alert.alert-success
+        a.close(href='#',data-dismiss='alert', aria-label='close') &times;
+        |<strong> Successo </strong> Salvataggio completo
+    div.alert.alert-warning
+        a.close(href='#',data-dismiss='alert', aria-label='close') &times;
+        |<strong> Attenzione </strong> problemi con il salvataggio riprovare
+block mainbar
+    form(name='compila',id="compila" , method='post', action='/salvapron')
+        table.table-bordered
+            thead
+                tr
+                    th Casa
+                    th Trasferta
+                    th Gol 1
+                    th Gol 2
+                    th Gol 1
+                    th Gol 2
+                    th Jolly
+                    th Tot gol
+                    th Tot gol
+                    th Jolly
+                    th Segno
+                    th Segno
+                    th Jolly
+            tbody
+                - each item in htab
+                    tr
+                        td= item.sq_casa
+                        td= item.sq_away
+                        td
+                            input.G1(type="text" , name="G1-#{item.cod_partita}", value="#{item.pr_g_casa}")
+                        td
+                            input.G2(type="text" , name="G2-#{item.cod_partita}", value="#{item.pr_g_away}")
+                        td
+                            input.G3(type="text" , name="G3-#{item.cod_partita}", value="#{item.pr_g_casa2}")
+                        td
+                            input.G4(type="text" , name="G4-#{item.cod_partita}", value="#{item.pr_g_away2}")
+                        td
+                            input.G5(type="text" , name="G5-#{item.cod_partita}", value="#{item.pr_j_gol}")
+                        td
+                            input.G6(type="text" , name="G6-#{item.cod_partita}", value="#{item.pr_n_gol}")
+                        td
+                            input.G7(type="text" , name="G7-#{item.cod_partita}", value="#{item.pr_n_gol2}")
+                        td
+                            input.G8(type="text" , name="G8-#{item.cod_partita}", value="#{item.pr_j_ng}")
+                        td
+                            input.G9(type="text" , name="G9-#{item.cod_partita}", value="#{item.pr_segno}")
+                        td
+                            input.G10(type="text" , name="G10-#{item.cod_partita}", value="#{item.pr_segno2}")
+                        td
+                            input.G11(type="text" , name="G11-#{item.cod_partita}", value="#{item.pr_j_segno}")
+block mainleft
+    div.btn-group-vertical
+        button.btn.btn-success#btnSubmit(type="button", value="Salva", onclick='validate()') Salva
+        a.btn.btn-info(href="/torneo?tid=#{cod_torneo}") Torneo
+        a.btn.btn-info(href="/utente") Principale

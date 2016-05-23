@@ -1,0 +1,12 @@
+//
+   Created by schiappacassed on 14/10/2015.
+
+extends layout
+block content
+    h1.text-left Caricamento file
+    form(id="uploadForm",enctype="multipart/form-data",action="/photo",method="post")
+        input(type="file" , name="userPhoto")
+        input(type="submit", value="upload", name="submit")
+block mainleft
+    div.btn-group-vertical
+        a.btn.btn-info(href="/utente") Principale

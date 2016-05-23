@@ -1,0 +1,31 @@
+//
+   Created by Daniele on 02/08/2015.
+extends layout
+block content
+    h1= title
+    p #{title} - Classifica
+block mainbar
+    table
+        thead
+            tr
+                th Squadra
+                th Punti
+                th Giocate
+                th Vinte
+                th Pareggi
+                th Perse
+                th G F
+                th G S
+                th Dif
+        tbody
+            - each item in classifica
+                tr
+                    td= item.nome_squadra
+                    td= item.punti
+                    td= item.giocate
+                    td= item.vinte
+                    td= item.pareggiate
+                    td= item.perse
+                    td= item.gol_fatti
+                    td= item.gol_subiti
+                    td= item.diff

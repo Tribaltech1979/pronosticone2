@@ -1,0 +1,16 @@
+extends layout2
+
+block content
+  script(src='/javascript/ind.js')
+  h1(id='prova')
+  div.alert.alert-info
+    a.close(href='#',data-dismiss='alert', aria-label='close') &times;
+    | <strong> Attenzione </strong> questo sito utilizza i cookies. Continuando si da' il consenso.
+block mainright
+        h1 Login
+        form.form-group#formAddUser(name="adduser",method="post",action="/login")
+            input#inputUserName(type="text", placeholder="Username", name="username")
+            p
+            input#inputUserPassword(type="password", placeholder="Password", name="password")
+            p
+            button#btnSubmit.btn.btn-default(type="submit") Login

@@ -1,0 +1,35 @@
+//
+   Created by schiappacassed on 15/10/2015.
+
+doctype
+html
+    head
+        title #{title}
+        meta(name ='viewport', content="width=device-width, initial-scale=1")
+        meta(charset="utf-8")
+        script(src='http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js')
+        script(src='http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js')
+        link(rel='stylesheet', href='http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css')
+        link(rel="stylesheet", href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css")
+        link(rel='stylesheet', href='/stylesheets/handsontable.css')
+        link(rel='stylesheet', href='/stylesheets/style.css')
+    body
+        header
+            img.img-responsive(src="img/bannerp.jpg" alt="banner")
+            script.
+                (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+                (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+                m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+                })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+                ga('create', 'UA-66416417-1', 'auto');
+                ga('send', 'pageview');
+        .container-fluid
+            block content
+            .row
+                .col-xs-12.col-md-8.col-lg-12
+                    block mainbar
+                    .row
+                        .col-xs-6.col-md-4.col-lg-6.col-lg-offset-4.col-md-offset-3.col-xs-offset-3
+                            block mainright
+        footer.footer
+            p Pronosticone.net

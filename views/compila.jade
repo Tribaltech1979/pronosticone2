@@ -1,0 +1,15 @@
+//
+   Created by Daniele on 09/08/2015.
+
+extends layout
+block content
+    script(type='text/javascript').
+        var lhtab =!{JSON.stringify(htab)}
+    script(src='http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js')
+    script(src='/javascript/handsontable.js')
+    script(src='/javascript/comptab.js')
+    h1 Inserimento risultati
+    input(type='hidden',value=lhtab)#lhtab
+    #insert
+block sidebar
+    .widget

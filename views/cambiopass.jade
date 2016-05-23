@@ -1,0 +1,30 @@
+extends layout
+block content
+    script(src='/javascript/cambiop.js')
+    h1.text-left Cambio Password
+    div.alert.alert-danger
+        a.close(href='#',data-dismiss='alert', aria-label='close') &times;
+        |<strong> Attenzione </strong> Bisogna correggere prima di inviare
+    div.alert.alert-success
+        a.close(href='#',data-dismiss='alert', aria-label='close') &times;
+        |<strong> Successo </strong> Salvataggio completo
+block mainbar
+    form(name='cambia',id="cambia" , method='post', action='/cambiop')
+        table.table-bordered
+            tbody
+                tr
+                    td Vecchia Password
+                    td
+                     input.G1(type="password" , name="G1", value="")
+                tr
+                    td Nuova Password
+                    td
+                        input.G2(type="password" , name="G2", value="")
+                tr
+                    td Ripeti Password
+                    td
+                        input.G3(type="password" , name="G3", value="")
+block mainleft
+    div.btn-group-vertical
+        button.btn.btn-success#btnSubmit(type="button", value="Salva", onclick='validate()') Salva
+        a.btn.btn-info(href="/utente") Principale

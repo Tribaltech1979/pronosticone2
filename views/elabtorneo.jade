@@ -1,0 +1,33 @@
+//
+   Created by Daniele on 31/08/2015.
+
+extends layout
+block mainbar
+    script(src='/javascript/elab.js')
+    input(type='hidden', name='torneo', value="#{list[0].cod_torneo}")
+    input(type='hidden', name='giorn', value="#{list[0].nro_giornata}")
+    div.alert.alert-success
+        a.close(href='#',data-dismiss='alert', aria-label='close') &times;
+        |<strong> Successo </strong> Salvataggio completo
+    table.table-bordered
+        thead
+            tr
+                th Squadra
+                th Squadra
+                th Punti
+                th Punti
+                th Gol
+                th Gol
+
+        tbody
+            - each item in list
+                tr
+                    td= item.sq_home
+                    td= item.sq_away
+                    td= item.punti_casa
+                    td= item.punti_away
+                    td= item.gol_casa
+                    td= item.gol_away
+block mainleft
+    div.btn-group-vertical
+        button.btn.btn-success#btnSubmit(type="button", value="Salva", onclick='save()') Salva

@@ -1,0 +1,30 @@
+
+extends layout
+block mainbar
+    h2. Giornata #{list[0].nro_giornata} - Risultati Live
+    div.progress
+        div.progress-bar(role="progressbar",aria-valuenow="#{valuenow}",aria-valuemin="0",aria-valuemax="100", style="width:#{valuenow}%")
+            span
+                |#{pargio}/#{partot}
+    table.table
+        thead
+            tr
+                th Partita
+                th Punti
+                th Punti
+                th Gol
+                th Gol
+        tbody
+            - each item in list
+                tr
+                    td
+                        a(href="/partita?tid=#{item.cod_torneo}&ngio=#{item.nro_giornata}&npar=#{item.nro_partita}")
+                            | #{item.sq_home} - #{item.sq_away}
+                    td= item.punti_casa
+                    td= item.punti_away
+                    td= item.gol_casa
+                    td= item.gol_away
+block mainleft
+    div.btn-group-vertical
+        a.btn.btn-info(href="/torneo?tid=#{cod_torneo}") Torneo
+        a.btn.btn-info(href="/utente") Principale
