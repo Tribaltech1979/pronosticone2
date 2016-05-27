@@ -19,6 +19,8 @@ var my_ute = require('./utente.js');
 var my_tor = require('./torneo.js');
 var my_par = require('./partita.js');
 
+var dbw = require("./dbworker.js");
+
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -240,6 +242,33 @@ router.post('/login',function(req,res){
 
         });
     });
+
+
+
+});
+//////////////////////
+///// POST LOGIN FACEBOOK
+////  Creo UTE_FB_ID
+///////////////////////
+router.post('/fblogin',function(req,res){
+    var pool = req.pool;
+    var username = req.body.fbid;
+
+
+    var usrquery =  "select * from Utenti where UTE_FB_ID = '" + username +"'" ;
+
+    var db_usr = new dbw(pool,usrquery);
+    var usr = db_usr.row;
+
+    //// nuovo utente
+    if (!usr.length){
+
+    }else if(usr[0].UTE_ID_SQUADRA > 0) {
+        //// ha la squadra
+    }else {
+        /// non ha la squadra
+
+    }
 
 
 

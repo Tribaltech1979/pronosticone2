@@ -14,3 +14,7 @@ block mainright
             input#inputUserPassword(type="password", placeholder="Password", name="password")
             p
             button#btnSubmit.btn.btn-default(type="submit") Login
+            a.btn.btn-primary(onclick='fblogin()')
+                span.fa.fa-facebook
+            a.btn.btn-danger(onclick='gplogin()')
+                span.fa.fa-google-plus
