@@ -41,7 +41,7 @@ var pool = mysql.createPool({
     host :  configuration.database,
     user : configuration.username,
     password :configuration.password,
-    database : 'pronosticone',
+    database : configuration.db,
     debug : false,
     dateStrings :true,
     multipleStatements : true
