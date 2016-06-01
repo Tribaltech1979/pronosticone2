@@ -29,4 +29,74 @@ $(document).ready(function() {
     $("body").css({'background-position': "center"});
 
     setTimeout(changeBackground, 1000);
+
+    window.fbAsyncInit = function() {
+        FB.init({
+            appId      : '1029924330389757',
+            xfbml      : true,
+            version    : 'v2.6'
+        });
+    };
+
+    (function(d, s, id){
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) {return;}
+        js = d.createElement(s); js.id = id;
+        js.src = "http//connect.facebook.net/en_US/sdk.js";
+        fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));
+
 });
+
+function fblogin(){
+    FB.getLoginStatus(function(response){
+        if(response.status == 'connected'){
+            FB.api('/me',function(response){
+
+                var profile = JSON.stringify(reponse);
+                $.post('/fblogin',{
+                    profilo : profile
+                });
+            });
+
+        }else{
+            FB.login();
+        }
+    });
+};
+
+
+function gplogin(){
+
+};
+
+function checkSubmit(){
+    $(".alert").hide();
+    var good = true;
+    $("input").css("background-color","white");
+    good = true;
+
+    $(".G1,.G2").each(function(){
+        if(!$(this).val()){
+            $(this).css('background-color','red');
+            good = false;
+        }
+    });
+
+
+    return good;
+}
+
+function login(){
+
+    if(checkSubmit()){
+        $.post('/login',{
+            username : $(".G1").val(),
+            password : $(".G2").val()
+
+        });
+
+    }
+
+
+}

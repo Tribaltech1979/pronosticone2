@@ -9,11 +9,11 @@ block content
 block mainright
         h1 Login
         form.form-group#formAddUser(name="adduser",method="post",action="/login")
-            input#inputUserName(type="text", placeholder="Username", name="username")
+            input#inputUserName.G1(type="text", placeholder="Username", name="username")
             p
-            input#inputUserPassword(type="password", placeholder="Password", name="password")
+            input#inputUserPassword.G2(type="password", placeholder="Password", name="password")
             p
-            button#btnSubmit.btn.btn-default(type="submit") Login
+            button#btnSubmit.btn.btn-default(onclick='login()') Login
             a.btn.btn-primary(onclick='fblogin()')
                 span.fa.fa-facebook
             a.btn.btn-danger(onclick='gplogin()')

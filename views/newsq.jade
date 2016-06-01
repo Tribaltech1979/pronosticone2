@@ -1,0 +1,32 @@
+//
+   Created by Schiappacassed on 19/09/2015.
+
+extends layout
+block content
+    script(src='/javascript/newsq.js')
+    h1.text-left Definizione Squadra
+    div.alert.alert-danger
+        a.close(href='#',data-dismiss='alert', aria-label='close') &times;
+        |<strong> Attenzione </strong> Bisogna correggere prima di inviare
+    div.alert.alert-success
+        a.close(href='#',data-dismiss='alert', aria-label='close') &times;
+        |<strong> Successo </strong> Salvataggio completo
+block mainleft
+    form(name='cambia',id="cambia" , method='post', action='/newsq')
+        table.table
+            tbody
+                tr
+                    td Nome Squadra
+                    td
+                        input.G1(type="text" , name="G1", value="#{nome_sq}")
+                tr
+                    td Email
+                    td
+                        input.G3(type="email" , name="G3", value="#{sq_mail}")
+                tr
+                    td Promemoria
+                    td
+
+                            input.G4(type="checkbox" , name="G3", value="Attiva")
+    div.btn-group-vertical
+        a.btn.btn-info(onclick="valida()") Salva

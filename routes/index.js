@@ -21,6 +21,8 @@ var my_par = require('./partita.js');
 
 var dbw = require("./dbworker.js");
 
+var usrlog = require("./usrlog.js");
+
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -225,6 +227,7 @@ router.post('/login',function(req,res){
             if(!err) {
                 if(rows[0]) {
                     console.log(rows[0]);
+                    var ulog = new usrlog(pool,rows[0].UTE_COD_UTENTE,"LOGIN","OLD");
                     req.session.utente = rows[0].UTE_COD_UTENTE;
                     res.redirect('/utente');
                 }
@@ -250,12 +253,16 @@ router.post('/login',function(req,res){
 ///// POST LOGIN FACEBOOK
 ////  Creo UTE_FB_ID
 ///////////////////////
-router.post('/fblogin',function(req,res){
+router.post('/fblogin',function (req,res, h) {
     var pool = req.pool;
-    var username = req.body.fbid;
+    var profilo = JSON.parse(req.body.profilo);
+
+    req.session.fbprofilo = profilo ;
+
+    var username = profilo.id;
 
 
-    var usrquery =  "select * from Utenti where UTE_FB_ID = '" + username +"'" ;
+    var usrquery =  "select * from Utenti where UTE_FB_ID = " + username  ;
 
     var db_usr = new dbw(pool,usrquery);
     var usr = db_usr.row;
@@ -263,12 +270,120 @@ router.post('/fblogin',function(req,res){
     //// nuovo utente
     if (!usr.length){
 
+        var insquery = "INSERT INTO Utenti set UTE_FB_ID = "+ username ;
+        var db_ins = new dbw(pool,insquery);
+
+        var ok = db_ins.row;
+
+        var db_usr2 = new dbw(pool,usrquery);
+        var usr2 = db_usr2.row;
+
+        req.session.utente = usr2[0].UTE_COD_UTENTE;
+        var ulog = new usrlog(pool,req.session.utente,"NEW USER","FACEBOOK");
+        res.redirect('/getsquadra');
+
+
     }else if(usr[0].UTE_ID_SQUADRA > 0) {
-        //// ha la squadra
+        //// ha la squadra, verifico il torneo
+        req.session.utente = usr[0].UTE_COD_UTENTE;
+        req.session.id_squadra = usr[0].UTE_ID_SQUADRA;
+        var chk_torneo = "SELECT count(cod_torneo) as conto from v_torneo where cod_utente = " + req.session.id_squadra +" AND arch <> 'X'";
+        var db_chk_torneo = new dbw(pool,chk_torneo);
+        var chk1 = db_chk_torneo.row
+
+        if(chk1[0].conto > 0)
+        {
+            var ulog = new usrlog(pool,req.session.utente,"LOGIN","FACEBOOK");
+            res.redirect('/utente');
+        }
+        else{
+            var ulog = new usrlog(pool,req.session.utente,"LOGIN","FACEBOOK-2");
+            res.redirect('/gettorneo');
+        }
+
     }else {
         /// non ha la squadra
+        req.session.utente = usr[0].UTE_COD_UTENTE;
+        var ulog = new usrlog(pool,req.session.utente,"LOGIN","FACEBOOK-3");
+        res.redirect('/getsquadra');
 
     }
+
+
+
+});
+///////////////////
+//// nuova squadra
+///////////////////
+router.get('/getsquadra',function(req,res){
+
+    var sq_name = req.session.profilo.name + " " +req.session.profilo.last_name;
+    var image = "http://graph.facebook.com/"+req.session.profilo.id+"/image";
+    res.render('newsq', {
+        "nome_sq": sq_name,
+        "sq_image": image,
+        "sq_mail": req_session.profilo.email
+    });
+
+});
+//////////////////
+////// ins nuova squadra
+/////////////////
+router.post('/newsq',function(req,res){
+    var pool =  req.pool;
+    var sq_name = req.body.squadra;
+    var image = req.body.image;
+    var email = req.body.email;
+    var check = req.body.chk;
+
+    var id_squadra = req.session.utente;
+
+    if (id_squadra){
+
+        var ins_squ = "Insert Squadre values ( "+id_squadra+", "+sq_name+", "+email+", "+ image +", "+check;
+        var db_ins = new dbw(pool,ins_squ);
+
+        var ris_ins = db_ins.row;
+        if(ris_ins.length){
+            var upd_ute = "Update Utenti set UTE_ID_SQUADRA = "+id_squadra+" WHERE UTE_COD_UTENTE = "+id_squadra;
+            var db_upd_ute = new dbw(pool, upd_ute);
+            var ris_upd = db_upd_ute.row;
+
+            if (ris_upd.length){
+
+                res.redirect('/gettorneo');
+
+            }else{
+
+                var del_sq = "Delete from Squadre Where SQ_ID_SQUADRA = " +id_squadra;
+                var db_del_sq = new dbw(pool, del_sq);
+
+                var ris_del = db_del_sq.row;
+
+                if (ris.del.length){
+                    res.redirect('/getsquadra');
+                }
+            }
+        }else{
+
+            res.redirect('/getsquadra');
+
+        }
+
+
+
+    }
+
+
+});
+////////////////
+//// iscrizione torneo
+/////////////////////
+router.get('/gettorneo',function(req,res){
+    var pool = req.pool;
+    var id = req.session.utente;
+
+    var new_tor = "select * from Torneo where TOR_ARCH <> 'X' and curdate() <= TOR_DATA_VAL and TOR_COD_TORNEO NOT IN ( select cod_torneo from v_torneo where id_squadra = "+id+" )";
 
 
 
@@ -314,6 +429,7 @@ router.get('/cimg', function(req,res){
 router.get('/logoff', function(req,res){
 	delete req.session.utente;
 	delete req.session.id_squadra;
+    delete req.session.profilo;
 	res.redirect('/');
 	});
 
@@ -335,7 +451,7 @@ router.get('/torneo*', function(req, res){
 
 
 });
-/*
+
 router.get('/gettorneo/:tid', function(req, res){
     var pool = req.pool;
     var mtid = req.params.tid;
@@ -363,7 +479,7 @@ router.get('/gettorneo/:tid', function(req, res){
 
         });
     });
-});*/
+});
 ////////////////////
 //// PARTITA
 /////////////////////
