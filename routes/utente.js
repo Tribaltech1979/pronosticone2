@@ -10,22 +10,32 @@ function Utente (res, pool, ute){
     this.pool = pool;
     this.ute = ute;
 
-    var tmquery = "select * from v_squadre where cod_ute = "+this.ute;
+    this.tmquery = "select * from v_squadre where cod_ute = "+this.ute;
 
 
-    var id_squadra = 0;
-    var nome_squadra = '';
-    var tor_res = {};
-    var cal_res = {};
-    var cal_past = {};
+    this.id_squadra = 0;
+    this.nome_squadra = '';
+    this.tor_res = {};
+    this.cal_res = {};
+    this.cal_past = {};
 
-};
 
-Utente.prototype.init = function(){
 
-    var db_tmquery = new dbw(this.pool, tmquery);
-    this.id_squadra = db_tmquery.row[0].id_squadra;
-    this.nome_squadra =db_tmquery.row[0].nome_squadra;
+this.init = function(){
+    
+    //var m_id_squadra, m_nome_squadra;
+
+    //console.log(this.pool, this.tmquery);
+    var db_tmquery = new dbw(this.pool, this.tmquery);
+    db_tmquery.getResult(function(res){
+         console.log(res[0].id_squadra);
+    this.id_squadra = res[0].id_squadra;
+    this.nome_squadra =res[0].nome_squadra;   
+    }.bind(this));
+
+    //this.id_squadra = m_id_squadra;
+   // this.nome_squadra = m_nome_squadra;
+    console.log(this.id_squadra);
 
     var tor_query = " select v_torneo.*, t1.LIVE from v_torneo,";
     tor_query = tor_query + "  ( select distinct GIO_COD_TORNEO, if ( (convert_tz(sysdate(),'-1:00','+1:00') > addtime(GIO_DATA_INIZIO, GIO_ORA_INIZIO)) && (CAL_PUNTI_HOME is null),1,0) LIVE ";
@@ -42,20 +52,27 @@ Utente.prototype.init = function(){
 
 
     var db_tor_query = new dbw(this.pool, tor_query);
-    this.tor_res = db_tor_query.row;
+    db_tor_query.getResult(function(res){
+        this.tor_res = res;
+    }.bind(this));
+    //this.tor_res = db_tor_query.row;
+    console.log(this.tor_res);
 
     var db_cal_query = new dbw(this.pool, cal_query);
-    this.cal_res = db_cal_query.row;
+    db_cal_query.getResult(function(res){
+        this.cal_res = res;
+    }.bind(this));
 
     var db_cal_past = new dbw(this.pool, cal_past);
-    this.cal_past = db_cal_past.row;
-
+        db_cal_past.getResult(function(res){
+        this.cal_past = res;
+    }.bind(this));
 
 
 
 };
 
-Utente.prototype.render = function(){
+this.render = function(){
 
 
     this.res.render('user', {"user": this.nome_squadra,
@@ -65,5 +82,5 @@ Utente.prototype.render = function(){
         "pastcal": this.cal_past
     });
 };
-
+};
 module.exports = Utente;

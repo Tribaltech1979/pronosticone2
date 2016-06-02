@@ -220,13 +220,13 @@ router.post('/login',function(req,res){
             return;
         }
 
-        console.log('connected as id ' + connection.threadId);
+       // console.log('connected as id ' + connection.threadId);
 
         connection.query(usrquery,function(err,rows){
             connection.release();
             if(!err) {
                 if(rows[0]) {
-                    console.log(rows[0]);
+                    //console.log(rows[0]);
                     var ulog = new usrlog(pool,rows[0].UTE_COD_UTENTE,"LOGIN","OLD");
                     req.session.utente = rows[0].UTE_COD_UTENTE;
                     res.redirect('/utente');

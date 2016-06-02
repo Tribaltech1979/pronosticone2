@@ -13,11 +13,12 @@ function usrlog (pool,id,area, msg){
         ('00' + date.getUTCMinutes()).slice(-2) + ':' +
         ('00' + date.getUTCSeconds()).slice(-2);
 
-    var inslog = "INSERT INTO USR_LOG values ("+date+", "+id+" , "+area+" , "+msg+" ) ";
-
+    var inslog = "INSERT INTO USR_LOG values ('"+date+"', "+id+" , '"+area+"' , '"+msg+"' ) ;";
+    
+    //console.log(inslog);
     var db_log = new dbw(pool, inslog);
 
-    var res = db_log.row;
+    db_log.myIExecute();
 
 };
 

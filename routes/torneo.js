@@ -38,32 +38,48 @@ function Torneo(res, pool, tid,id_squadra, utente){
 
 Torneo.prototype.init = function(){
 
-     var row1 = this.db_class_query.row;
+    this.db_class_query.getResult(function(row1){
     this.tipo_torneo = row1[0].TOR_TIPO_TORNEO;
     this.title = row1[0].TOR_DESCR_TORNEO;
     this.image = row1[0].TOR_IMAGE;
-    this.massimo = this.db_q_massimo.row[0].tot_gio;
-    this.mgio = this.db_q_currgio.row[0].cur_gio;
-
+        
     if(row1[0].TOR_COD_PADRE){
         var q_padr = " select * from Torneo where TOR_COD_PADRE = " + row1[0].TOR_COD_PADRE + " order by TOR_COD_TORNEO";
         var db_q_padr = new dbw(pool,q_padr);
-        this.padre = db_q_padr.row;
+        db_q_padr.getResult(function(res){
+            this.padre = res;
+        }.bind(this));
     }
 
     if(row1[0].TOR_COD_MASTER == this.utente){
         this.admin = true;
     }
-
-
-
+    }.bind(this));
+    
+    this.db_q_massimo.getResult(function(row){
+        this.massimo = row[0].tot_gio;
+    }.bind(this));
+    
+    this.db_q_currgio.getResult(function(row){
+        this.mgio = row[0].cur_gio;
+    }.bind(this));    
+    
+    
+    //this.mgio = this.db_q_currgio.row[0].cur_gio;
 
 };
 
 Torneo.prototype.render = function(){
 
-    var rows2 = this.db_cal_query.row;
-    var rows3 = this.db_past.row;
+    var rows2 = {};
+    this.db_cal_query.getResult(function(res){
+        rows2 = res;
+    }.bind(this));
+    
+    var rows3 = {};
+    this.db_past.getResult(function(res){
+        rows3 = res;
+    }.bind(this));
 
     if(this.tipo_torneo ==1 ) {
         this.res.render('ttorneo', {
@@ -82,11 +98,11 @@ Torneo.prototype.render = function(){
         this.res.render('ttorneo2', {
             "title": rows[0].TOR_DESCR_TORNEO,
             "image": rows[0].TOR_IMAGE,
-            "numgiorn": massimo,
-            "curgio": mgio,
-            "padre": padre,
-            "tid": tid,
-            "admin": admin,
+            "numgiorn": this.massimo,
+            "curgio": this.mgio,
+            "padre": this.padre,
+            "tid": this.tid,
+            "admin": this.admin,
             "calen": rows2,
             "pcalen": rows3
         });

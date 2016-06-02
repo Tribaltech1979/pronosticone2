@@ -33,17 +33,23 @@ function Partita(res, pool, tid, ngio, npar, utente, id_squadra){
     this.cod_away = 0;
 
 
-};
 
-Partita.prototype.init = function() {
+
+this.init = function() {
 
     var check2 = {};
 
-    this.checkOrario = this.db_check1.row[0].CH1;
-    check2 = this.db_check2.row;
+    this.db_check1.getResult(function(res){
+        this.checkOrario = res[0].CH1;
+    }.bind(this));
+    //this.checkOrario = this.db_check1.row[0].CH1;
+    this.db_check2.getResult(function(res){
+    this.cod_home = res[0].CAL_COD_HOME;
+    this.cod_away = res[0].CAL_COD_AWAY;
+    }.bind(this))
+   // check2 = this.db_check2.row;
 
-    this.cod_home = check2[0].CAL_COD_HOME;
-    this.cod_away = check2[0].CAL_COD_AWAY;
+
 
 };
 
@@ -64,7 +70,10 @@ Partita.prototype.render = function(){
             (this.id_squadra == this.cod_away)
             ) {
 
-            rows4 = this.db_pron.row;
+            //rows4 = this.db_pron.row;
+            this.db_pron.getResult(function(res){
+                rows4 = res;
+            }.bind(this));
 
             this.res.render('compila2', {
                 'title': "Inserimento risultati",
@@ -86,13 +95,22 @@ Partita.prototype.render = function(){
         var t_query = "Select * from v_global_calen where cod_torneo = "+this.tid+" and nro_giornata = "+ this.ngio+" and nro_partita = "+this.npar+" ;";
 
         var db_query_t = new dbw(this.pool,p_query_t);
-        rows0 = db_query_t.row;
+        //rows0 = db_query_t.row;
+        db_query_t.getResult(function(res){
+            rows0=res;
+        }.bind(this));
 
         var db_query_h = new dbw(this.pool,p_query_h);
-        rows2 = db_query_h.row;
-
+        //rows2 = db_query_h.row;
+        db_query_h.getResult(function(res){
+            rows2=res;
+        }.bind(this));
+        
         var db_query_a = new dbw(this.pool,p_query_a);
-        rows3 = db_query_a.row;
+        //rows3 = db_query_a.row;
+        db_query_a.getResult(function(res){
+            rows3=res;
+        }.bind(this));
 
         this.res.render('risultato',{
             "title" : rows0[0].sq_home+" VS "+rows0[0].sq_away,
@@ -105,5 +123,6 @@ Partita.prototype.render = function(){
 
     }
 };
+    };
 
 module.exports = Partita;
