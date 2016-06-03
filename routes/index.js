@@ -191,18 +191,7 @@ router.post('/cmail', function(req,res){
     }
 });
 
-/////////////
-//// UTENTE
-/////////////
-router.get('/utente',function(req,res){
-    if(req.session.utente){
-        sess_ute = new my_ute(res,req.pool,req.session.utente);
-        sess_ute.init();
-        sess_ute.render();
 
-    }
-    else {res.redirect('/login');}
-});
 //////////////////////
 ///// POST LOGIN
 ///////////////////////
@@ -838,6 +827,17 @@ router.get('/elabtorneo*', function(req, res) {
         });
     });
 
+});
+/////////////
+//// UTENTE
+/////////////
+router.get('/utente',function(req,res){
+    if(req.session.utente){
+        sess_ute = new my_ute(res,req.pool,req.session.utente);
+        sess_ute.init();
+        sess_ute.render();
+    }
+    else {res.redirect('/login');}
 });
 
 router.post('/salvatorneo', function(req,res){

@@ -23,20 +23,22 @@ function Utente (res, pool, ute){
 
 this.init = function(){
     
-    //var m_id_squadra, m_nome_squadra;
+    var m_id_squadra, m_nome_squadra;
 
     //console.log(this.pool, this.tmquery);
     var db_tmquery = new dbw(this.pool, this.tmquery);
     db_tmquery.getResult(function(res){
-         console.log(res[0].id_squadra);
+         console.log("squadra in :" + res[0].id_squadra);
     this.id_squadra = res[0].id_squadra;
     this.nome_squadra =res[0].nome_squadra;   
-    }.bind(this));
+    
 
     //this.id_squadra = m_id_squadra;
    // this.nome_squadra = m_nome_squadra;
-    console.log(this.id_squadra);
-
+    console.log("squadra exit : " +this.id_squadra);
+    
+    
+    
     var tor_query = " select v_torneo.*, t1.LIVE from v_torneo,";
     tor_query = tor_query + "  ( select distinct GIO_COD_TORNEO, if ( (convert_tz(sysdate(),'-1:00','+1:00') > addtime(GIO_DATA_INIZIO, GIO_ORA_INIZIO)) && (CAL_PUNTI_HOME is null),1,0) LIVE ";
     tor_query = tor_query + " from Giornate, Calendario" ;
@@ -54,33 +56,38 @@ this.init = function(){
     var db_tor_query = new dbw(this.pool, tor_query);
     db_tor_query.getResult(function(res){
         this.tor_res = res;
-    }.bind(this));
+    
     //this.tor_res = db_tor_query.row;
-    console.log(this.tor_res);
+    //console.log(this.tor_res);
 
     var db_cal_query = new dbw(this.pool, cal_query);
     db_cal_query.getResult(function(res){
         this.cal_res = res;
-    }.bind(this));
+    
 
     var db_cal_past = new dbw(this.pool, cal_past);
         db_cal_past.getResult(function(res){
         this.cal_past = res;
+            
+            
+    this.res.render('user', 
+      {"user": this.nome_squadra,
+        title: this.nome_squadra + ' Homepage',
+        "torneo": this.tor_res,
+        "calendario": this.cal_res,
+        "pastcal": this.cal_past});
+            
     }.bind(this));
-
-
-
+    }.bind(this));    
+    }.bind(this));    
+    }.bind(this));
 };
 
 this.render = function(){
 
 
-    this.res.render('user', {"user": this.nome_squadra,
-        title: this.nome_squadra + ' Homepage',
-        "torneo": this.tor_res,
-        "calendario": this.cal_res,
-        "pastcal": this.cal_past
-    });
+
+    
 };
 };
 module.exports = Utente;
