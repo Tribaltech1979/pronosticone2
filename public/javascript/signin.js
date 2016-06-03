@@ -15,12 +15,16 @@ function checkSubmit(){
     $("input").css("background-color","white");
     good = true;
 
-    $(".G1,.G3").each(function(){
+    $(".G1,.G2,.G3,.G4").each(function(){
         if(!$(this).val()){
             $(this).css('background-color','red');
             good = false;
         }
     });
+
+    if($(".G2").val() != $(".G3").val()){
+        $(".G2,.G3").css('background-color','red');
+    }
 
 
     return good;
@@ -30,17 +34,19 @@ function checkSubmit(){
 function valida(){
     if (checkSubmit()){
         var sq = $(".G1").val();
+        var pass = $(".G2").val();
         var image = null;
-        var mail = $(".G3").val();
+        var mail = $(".G4").val();
         var checkb = '';
-        if($(".G4").is(':checked')){
+        if($(".G5").is(':checked')){
             checkb = 'X';
         }
-        $.post('/newsq',{
+        $.post('/signin',{
             squadra :sq,
             image : image,
             email : mail,
-            chk : checkb
+            chk : checkb,
+            password : pass
         });
     }
 }

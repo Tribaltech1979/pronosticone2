@@ -442,14 +442,14 @@ router.post('/signin',function(req,res){
                                     var del_sq = "Delete from Squadre Where SQ_ID_SQUADRA = " +id_squadra;
                                     connection.query(del_sq,function(err,ris){
                                         connection.release();
-                                        res.redirect('/getsquadra');
+                                        res.redirect('/signin');
                                     })
                                 }
                             });
                         }
                         else{
                             connection.release();
-                            res.redirect('/getsquadra');
+                            res.redirect('/signin');
                         }
 
                     });

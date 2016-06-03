@@ -1,0 +1,106 @@
+//
+   Created by Daniele on 09/08/2015.
+
+//
+   Created by Daniele on 11/08/2015.
+extends layout
+block content
+    script(src='/javascript/ristab2.js')
+    h1 #{tes.sq_home} VS #{tes.sq_away} --- #{tes.gol_home} - #{tes.gol_away}
+    h2 Risultato - #{tes.descr_torneo}
+    div.alert.alert-danger
+        a.close(href='#',data-dismiss='alert', aria-label='close') &times;
+        | <strong> Attenzione </strong> Bisogna correggere prima di inviare
+    div.alert.alert-success
+        a.close(href='#',data-dismiss='alert', aria-label='close') &times;
+        | <strong> Successo </strong> Salvataggio completo
+    div.alert.alert-warning
+        a.close(href='#',data-dismiss='alert', aria-label='close') &times;
+        | <strong> Attenzione </strong> problemi con il salvataggio riprovare
+block mainbar
+        h2 Risultati #{tes.sq_home}
+        if tes.punti_home
+            h3 Punti #{tes.punti_home}
+        table.table-responsive.table-bordered
+            thead
+                tr
+                    th Casa
+                    th Trasferta
+                    th Risultato
+                    th Risultato
+                    th Risultato
+                    th Gol 1
+                    th Gol 2
+                    th Gol 1
+                    th Gol 2
+                    th Jolly
+                    th Tot gol
+                    th Tot gol
+                    th Jolly
+                    th Segno
+                    th Segno
+                    th Jolly
+            tbody
+                - each item in home
+                    tr
+                        td.G1= item.sq_casa
+                        td.G2= item.sq_away
+                        td.G3= item.ris_g_casa
+                        td.G4= item.ris_g_away
+                        td.G5= item.ris_segno
+                        td.G6= item.pr_g_casa
+                        td.G7= item.pr_g_away
+                        td.G8= item.pr_g_casa2
+                        td.G9= item.pr_g_away2
+                        td.G10= item.pr_j_gol
+                        td.G11= item.pr_n_gol
+                        td.G12= item.pr_n_gol2
+                        td.G13= item.pr_j_ng
+                        td.G14= item.pr_segno
+                        td.G15= item.pr_segno2
+                        td.G16= item.pr_j_segno
+        h2 Risultati #{tes.sq_away}
+        if tes.punti_away
+            h3 Punti #{tes.punti_away}
+        table.table-bordered
+            thead
+                tr
+                    th Squadra 1
+                    th Squadra 2
+                    th Risultato
+                    th Risultato
+                    th Risultato
+                    th Gol 1
+                    th Gol 2
+                    th Gol 1
+                    th Gol 2
+                    th Jolly
+                    th Tot gol
+                    th Tot gol
+                    th Jolly
+                    th Segno
+                    th Segno
+                    th Jolly
+            tbody
+                - each item in away
+                    tr
+                        td.G1= item.sq_casa
+                        td.G2= item.sq_away
+                        td.G3= item.ris_g_casa
+                        td.G4= item.ris_g_away
+                        td.G5= item.ris_segno
+                        td.G6= item.pr_g_casa
+                        td.G7= item.pr_g_away
+                        td.G8= item.pr_g_casa2
+                        td.G9= item.pr_g_away2
+                        td.G10= item.pr_j_gol
+                        td.G11= item.pr_n_gol
+                        td.G12= item.pr_n_gol2
+                        td.G13= item.pr_j_ng
+                        td.G14= item.pr_segno
+                        td.G15= item.pr_segno2
+                        td.G16= item.pr_j_segno
+block mainleft
+    div.btn-group-vertical
+        a.btn.btn-info(href="/torneo?tid=#{cod_torneo}") Torneo
+        a.btn.btn-info(href="/utente") Principale
