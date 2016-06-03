@@ -1,0 +1,39 @@
+//
+   Created by Schiappacassed on 19/09/2015.
+
+extends layout
+block content
+    script(src='/javascript/signin.js')
+    h1.text-left Definizione Squadra
+    div.alert.alert-danger
+        a.close(href='#',data-dismiss='alert', aria-label='close') &times;
+        |<strong> Attenzione </strong> Bisogna correggere prima di inviare
+    div.alert.alert-success
+        a.close(href='#',data-dismiss='alert', aria-label='close') &times;
+        |<strong> Successo </strong> Salvataggio completo
+block mainleft
+    form(name='cambia',id="cambia" , method='post', action='/signin')
+        table.table
+            tbody
+                tr
+                    td Nome Squadra
+                    td
+                        input.G1(type="text" , name="G1", value="#{nome_sq}")
+                tr
+                    td Password
+                    td
+                        input.G2(type="password" , name="G2", value="")
+                tr
+                    td Ripeti Password
+                    td
+                        input.G3(type="password" , name="G3", value="")
+                tr
+                    td Email
+                    td
+                        input.G4(type="email" , name="G3", value="#{sq_mail}")
+                tr
+                    td Promemoria
+                    td
+                        input.G5(type="checkbox" , name="G3", value="Attiva")
+    div.btn-group-vertical
+        a.btn.btn-info(onclick="valida()") Salva

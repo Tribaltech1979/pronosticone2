@@ -1,0 +1,14 @@
+extends layout
+block content
+    h1.text-left Seleziona il torneo
+
+block mainbar
+    h2.text-left I tornei disponibili
+    div.list-group(style="max-height: 300px; overflow-y:scroll;")
+        each user, i in torneo
+            a.list-group-item(href="/addtor?tid=#{user.TOR_COD_TORNEO}")
+                img.img-thumbnail.pull-left(src="img/#{user.TOR_IMAGE}",width="50", height="65")
+                h4.list-group-item-heading &nbsp; #{user.TOR_DESCR_TORNEO} &nbsp; &nbsp; &nbsp;
+block mainleft
+
+block mainright

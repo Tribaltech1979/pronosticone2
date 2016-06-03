@@ -200,7 +200,7 @@ router.post('/login',function(req,res){
     var username = req.body.username;
     var password = req.body.password;
 
-    var usrquery =  "select UTE_COD_UTENTE from Utenti where UTE_MAIL = '" + username + "' and UTE_PASS = '" + password+"'" ;
+
 
     pool.getConnection(function(err,connection){
         if (err) {
@@ -210,7 +210,7 @@ router.post('/login',function(req,res){
         }
 
        // console.log('connected as id ' + connection.threadId);
-
+        var usrquery =  "select UTE_COD_UTENTE from Utenti where UTE_MAIL = '" + connection.escape(username) + "' and UTE_PASS = '" + connection.escape(password)+"'" ;
         connection.query(usrquery,function(err,rows){
             connection.release();
             if(!err) {
@@ -218,6 +218,17 @@ router.post('/login',function(req,res){
                     //console.log(rows[0]);
                     var ulog = new usrlog(pool,rows[0].UTE_COD_UTENTE,"LOGIN","OLD");
                     req.session.utente = rows[0].UTE_COD_UTENTE;
+                    /*
+                     var chk_torneo = "SELECT count(cod_torneo) as conto from v_torneo where cod_utente = " + req.session.utente +" AND arch <> 'X'";
+                     connection.query(chk_torneo, function(err, ris){
+                            if(ris.conto == 0)
+                            {
+                                res.redirect('/gettorn');
+                            }
+                            else  { //vai ad utente
+                     } );
+
+                     */
                     res.redirect('/utente');
                 }
                 else{
@@ -253,51 +264,67 @@ router.post('/fblogin',function (req,res, h) {
 
     var usrquery =  "select * from Utenti where UTE_FB_ID = " + username  ;
 
-    var db_usr = new dbw(pool,usrquery);
-    var usr = db_usr.row;
 
-    //// nuovo utente
-    if (!usr.length){
-
-        var insquery = "INSERT INTO Utenti set UTE_FB_ID = "+ username ;
-        var db_ins = new dbw(pool,insquery);
-
-        var ok = db_ins.row;
-
-        var db_usr2 = new dbw(pool,usrquery);
-        var usr2 = db_usr2.row;
-
-        req.session.utente = usr2[0].UTE_COD_UTENTE;
-        var ulog = new usrlog(pool,req.session.utente,"NEW USER","FACEBOOK");
-        res.redirect('/getsquadra');
+    pool.getConnection(function(err,connection){
+        connection.query(usrquery,function(err, usr){
 
 
-    }else if(usr[0].UTE_ID_SQUADRA > 0) {
-        //// ha la squadra, verifico il torneo
-        req.session.utente = usr[0].UTE_COD_UTENTE;
-        req.session.id_squadra = usr[0].UTE_ID_SQUADRA;
-        var chk_torneo = "SELECT count(cod_torneo) as conto from v_torneo where cod_utente = " + req.session.id_squadra +" AND arch <> 'X'";
-        var db_chk_torneo = new dbw(pool,chk_torneo);
-        var chk1 = db_chk_torneo.row
+            if (!usr.length){
 
-        if(chk1[0].conto > 0)
-        {
-            var ulog = new usrlog(pool,req.session.utente,"LOGIN","FACEBOOK");
-            res.redirect('/utente');
-        }
-        else{
-            var ulog = new usrlog(pool,req.session.utente,"LOGIN","FACEBOOK-2");
-            res.redirect('/gettorneo');
-        }
+                var insquery = "INSERT INTO Utenti set UTE_FB_ID = "+ username ;
 
-    }else {
-        /// non ha la squadra
-        req.session.utente = usr[0].UTE_COD_UTENTE;
-        var ulog = new usrlog(pool,req.session.utente,"LOGIN","FACEBOOK-3");
-        res.redirect('/getsquadra');
+                connection.query(insquery, function (err,ris1) {
+                    if(!err){
+                        connection.query(usrquery,function(err, usr2){
+                            connection.release();
+                            req.session.utente = usr2[0].UTE_COD_UTENTE;
+                            var ulog = new usrlog(pool,req.session.utente,"NEW USER","FACEBOOK");
+                            res.redirect('/getsquadra');
 
-    }
+                        });
+                    }
+                    else{
+                        connection.release();
+                    }
+                });
 
+
+                }else if(usr[0].UTE_ID_SQUADRA > 0) {
+                //// ha la squadra, verifico il torneo
+                req.session.utente = usr[0].UTE_COD_UTENTE;
+                req.session.id_squadra = usr[0].UTE_ID_SQUADRA;
+                var chk_torneo = "SELECT count(cod_torneo) as conto from v_torneo where cod_utente = " + req.session.id_squadra +" AND arch <> 'X'";
+                connection.query(chk_torneo,function(err,chk1){
+                    connection.release();
+                    if(chk1[0].conto > 0)
+                    {
+                        var ulog = new usrlog(pool,req.session.utente,"LOGIN","FACEBOOK");
+                        res.redirect('/utente');
+                    }
+                    else{
+                        var ulog = new usrlog(pool,req.session.utente,"LOGIN","FACEBOOK-2");
+                        res.redirect('/gettorneo');
+                    }
+                });
+
+
+
+
+            }else {
+                connection.release();
+                /// non ha la squadra
+                req.session.utente = usr[0].UTE_COD_UTENTE;
+                var ulog = new usrlog(pool,req.session.utente,"LOGIN","FACEBOOK-3");
+                res.redirect('/getsquadra');
+
+            }
+
+
+        });
+
+
+
+    });
 
 
 });
@@ -315,6 +342,21 @@ router.get('/getsquadra',function(req,res){
     });
 
 });
+////////
+/// SIGN IN
+/////////
+router.get('/signin',function(req,res){
+
+    var sq_name = req.session.profilo.name + " " +req.session.profilo.last_name;
+    var image = "http://graph.facebook.com/"+req.session.profilo.id+"/image";
+    res.render('signin', {
+        "nome_sq": sq_name,
+        "sq_image": image,
+        "sq_mail": req_session.profilo.email
+    });
+
+});
+
 //////////////////
 ////// ins nuova squadra
 /////////////////
@@ -329,42 +371,105 @@ router.post('/newsq',function(req,res){
 
     if (id_squadra){
 
-        var ins_squ = "Insert Squadre values ( "+id_squadra+", "+sq_name+", "+email+", "+ image +", "+check;
-        var db_ins = new dbw(pool,ins_squ);
 
-        var ris_ins = db_ins.row;
-        if(ris_ins.length){
-            var upd_ute = "Update Utenti set UTE_ID_SQUADRA = "+id_squadra+" WHERE UTE_COD_UTENTE = "+id_squadra;
-            var db_upd_ute = new dbw(pool, upd_ute);
-            var ris_upd = db_upd_ute.row;
 
-            if (ris_upd.length){
+        pool.getConnection(function(err, connection){
 
-                res.redirect('/gettorneo');
-
-            }else{
-
-                var del_sq = "Delete from Squadre Where SQ_ID_SQUADRA = " +id_squadra;
-                var db_del_sq = new dbw(pool, del_sq);
-
-                var ris_del = db_del_sq.row;
-
-                if (ris.del.length){
+            var ins_squ = "Insert Squadre values ( "+id_squadra+", '"+connection.escape(sq_name)+"', '"+connection.escape(email)+"', '"+ connection.escape(image) +"', '"+connection.escape(check)+"');";
+            connection.query(ins_squ, function(err,ris_ins){
+                if(ris_ins.affectedRows){
+                    var upd_ute = "Update Utenti set UTE_ID_SQUADRA = "+id_squadra+" WHERE UTE_COD_UTENTE = "+id_squadra;
+                    connection.query(upd_ute, function (err, ris_upd) {
+                       if(ris_upd.affectedRows){
+                           connection.release();
+                           res.redirect('/gettorneo');
+                       }
+                        else{
+                           var del_sq = "Delete from Squadre Where SQ_ID_SQUADRA = " +id_squadra;
+                           connection.query(del_sq,function(err,ris){
+                               connection.release();
+                               res.redirect('/getsquadra');
+                           })
+                       }
+                    });
+                }
+                else{
+                    connection.release();
                     res.redirect('/getsquadra');
                 }
-            }
-        }else{
 
-            res.redirect('/getsquadra');
+            });
 
-        }
-
-
-
+        });
     }
 
 
 });
+//////////////
+/// SIGNIN
+/////////////////
+router.post('/signin',function(req,res){
+    var pool =  req.pool;
+    var sq_name = req.body.squadra;
+    var image = req.body.image;
+    var email = req.body.email;
+    var check = req.body.chk;
+    var username = req.body.squadra;
+    var password = req.body.password;
+
+    pool.getConnection(function(err,connection){
+
+        var insquery = "INSERT INTO Utenti set UTE_MAIL = '"+ connection.escape(username)+"',UTE_PASS = '"+connection.escape(password)+"' ;";
+
+        connection.query(insquery, function (err,ris1) {
+            if(!err){
+                connection.query(usrquery,function(err, usr2){
+
+                    req.session.utente = usr2.insertId;
+                    var id_squadra = usr2.insertId;
+                    var ulog = new usrlog(pool,req.session.utente,"NEW USER","FACEBOOK");
+
+                    var ins_squ = "Insert Squadre values ( "+id_squadra+", '"+connection.escape(sq_name)+"', '"+connection.escape(email)+"', '"+ connection.escape(image) +"', '"+connection.escape(check)+"');";
+                    connection.query(ins_squ, function(err,ris_ins){
+                        if(ris_ins.affectedRows){
+                            var upd_ute = "Update Utenti set UTE_ID_SQUADRA = "+id_squadra+" WHERE UTE_COD_UTENTE = "+id_squadra;
+                            connection.query(upd_ute, function (err, ris_upd) {
+                                if(ris_upd.affectedRows){
+                                    connection.release();
+                                    res.redirect('/gettorneo');
+                                }
+                                else{
+                                    var del_sq = "Delete from Squadre Where SQ_ID_SQUADRA = " +id_squadra;
+                                    connection.query(del_sq,function(err,ris){
+                                        connection.release();
+                                        res.redirect('/getsquadra');
+                                    })
+                                }
+                            });
+                        }
+                        else{
+                            connection.release();
+                            res.redirect('/getsquadra');
+                        }
+
+                    });
+
+
+                });
+            }
+            else{
+                connection.release();
+            }
+        });
+
+    });
+
+
+
+});
+
+
+
 ////////////////
 //// iscrizione torneo
 /////////////////////
@@ -374,7 +479,80 @@ router.get('/gettorneo',function(req,res){
 
     var new_tor = "select * from Torneo where TOR_ARCH <> 'X' and curdate() <= TOR_DATA_VAL and TOR_COD_TORNEO NOT IN ( select cod_torneo from v_torneo where id_squadra = "+id+" )";
 
+    pool.getConnection(function(err,connection){
+        connection.query(new_tor,function(err,ris){
+            connection.release();
+            if(ris) {
+                res.render('newtor',{
+                    "torneo" : ris
+                });
 
+            }else{
+
+                res.redirect('/utente');
+            }
+        });
+    });
+
+
+
+});
+
+router.get('/addtorneo',function(req,res){
+    var pool = req.pool;
+    var id = req.session.utente;
+
+    var new_tor = "select * from Torneo where TOR_ARCH <> 'X' and curdate() <= TOR_DATA_VAL and TOR_COD_TORNEO NOT IN ( select cod_torneo from v_torneo where id_squadra = "+id+" )";
+
+    pool.getConnection(function(err,connection){
+        connection.query(new_tor,function(err,ris){
+
+            if(ris) {
+                var tmquery = "select * from v_squadre where cod_ute = "+id;
+                connection.query(tmquery,function(err, ris2){
+
+                    connection.release();
+                    res.render('addtor',{
+                        "torneo" : ris,
+                        "torneo2" :ris2
+
+                    });
+
+                });//tmquery
+
+
+            }else{
+                connection.release();
+                res.redirect('/utente');
+            }
+        });
+    });
+
+
+
+});
+router.get('/addtor*',function(req,res){
+    var pool = req.pool;
+    var id = req.session.utente;
+    var tid = req.query.tid;
+
+    pool.getConnection(function(err,connection){
+
+        var q_tor = "select * from Torneo where TOR_COD_TORNEO = "+ connection.escape(tid);
+        connection.query(q_tor,(function(err,ris1){
+            if(ris1){
+                if(ris1[0].TOR_TIPO_TORNEO ==4)
+                {
+                    var query = "Insert into Partecipanti values ("+ris1[0].TOR_COD_TORNEO+","+id+")";
+                    //// TO DO - GENERO PRONOSTICO
+                }
+
+            }
+
+        })
+        );//qtor
+       //
+    });
 
 });
 ///////////////////

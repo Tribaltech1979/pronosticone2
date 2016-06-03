@@ -42,28 +42,73 @@ Torneo.prototype.init = function(){
     this.tipo_torneo = row1[0].TOR_TIPO_TORNEO;
     this.title = row1[0].TOR_DESCR_TORNEO;
     this.image = row1[0].TOR_IMAGE;
+
+    var m_padre = {};
         
     if(row1[0].TOR_COD_PADRE){
         var q_padr = " select * from Torneo where TOR_COD_PADRE = " + row1[0].TOR_COD_PADRE + " order by TOR_COD_TORNEO";
         var db_q_padr = new dbw(pool,q_padr);
         db_q_padr.getResult(function(res){
-            this.padre = res;
-        }.bind(this));
+            m_padre = res;
+        }.bind(this));//q_pqdr
     }
 
     if(row1[0].TOR_COD_MASTER == this.utente){
         this.admin = true;
     }
-    }.bind(this));
+
     
-    this.db_q_massimo.getResult(function(row){
-        this.massimo = row[0].tot_gio;
-    }.bind(this));
-    
-    this.db_q_currgio.getResult(function(row){
-        this.mgio = row[0].cur_gio;
-    }.bind(this));    
-    
+        this.db_q_massimo.getResult(function(row){
+            this.massimo = row[0].tot_gio;
+
+
+            this.db_q_currgio.getResult(function(row){
+                this.mgio = row[0].cur_gio;
+
+                ////RENDER
+
+                var rows2 = {};
+                this.db_cal_query.getResult(function(res){
+                    rows2 = res;
+
+
+                    var rows3 = {};
+                    this.db_past.getResult(function(res){
+                        rows3 = res;
+
+
+                    if(this.tipo_torneo ==1 ) {
+                        this.res.render('ttorneo', {
+                            "title": this.title,
+                            "image": this.image,
+                            "numgiorn": this.massimo,
+                            "curgio": this.mgio,
+                            "padre": this.padre,
+                            "tid": this.tid,
+                            "admin": this.admin,
+                            "calen": rows2,
+                            "pcalen": rows3
+                        });
+                    }
+                    else {
+                        this.res.render('ttorneo2', {
+                            "title": rows[0].TOR_DESCR_TORNEO,
+                            "image": rows[0].TOR_IMAGE,
+                            "numgiorn": this.massimo,
+                            "curgio": this.mgio,
+                            "padre": this.padre,
+                            "tid": this.tid,
+                            "admin": this.admin,
+                            "calen": rows2,
+                            "pcalen": rows3
+                        });
+
+                        }
+                    }.bind(this)); //rows3
+                }.bind(this));//rows2
+            }.bind(this));//Current
+        }.bind(this)); //massimo
+    }.bind(this));//row1
     
     //this.mgio = this.db_q_currgio.row[0].cur_gio;
 
@@ -71,42 +116,7 @@ Torneo.prototype.init = function(){
 
 Torneo.prototype.render = function(){
 
-    var rows2 = {};
-    this.db_cal_query.getResult(function(res){
-        rows2 = res;
-    }.bind(this));
-    
-    var rows3 = {};
-    this.db_past.getResult(function(res){
-        rows3 = res;
-    }.bind(this));
 
-    if(this.tipo_torneo ==1 ) {
-        this.res.render('ttorneo', {
-            "title": this.title,
-            "image": this.image,
-            "numgiorn": this.massimo,
-            "curgio": this.mgio,
-            "padre": this.padre,
-            "tid": this.tid,
-            "admin": this.admin,
-            "calen": rows2,
-            "pcalen": rows3
-        });
-    }
-    else {
-        this.res.render('ttorneo2', {
-            "title": rows[0].TOR_DESCR_TORNEO,
-            "image": rows[0].TOR_IMAGE,
-            "numgiorn": this.massimo,
-            "curgio": this.mgio,
-            "padre": this.padre,
-            "tid": this.tid,
-            "admin": this.admin,
-            "calen": rows2,
-            "pcalen": rows3
-        });
-    }
 };
 
 
