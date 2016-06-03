@@ -16,9 +16,11 @@ function usrlog (pool,id,area, msg){
     var inslog = "INSERT INTO USR_LOG values ('"+date+"', "+id+" , '"+area+"' , '"+msg+"' ) ;";
     
     //console.log(inslog);
-    var db_log = new dbw(pool, inslog);
-
-    db_log.myIExecute();
+    pool.getConnection(function(err,connection){
+        connection.query(inslog,function(err,ris){
+            
+        });
+    });
 
 };
 

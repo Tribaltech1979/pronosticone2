@@ -17,7 +17,7 @@ block content
         a.close(href='#',data-dismiss='alert', aria-label='close') &times;
         |<strong> Attenzione </strong> problemi con il salvataggio riprovare
 block mainbar
-    form(name='compila',id="compila" , method='post', action='/salvapron')
+    form(name='compila',id="compila" , method='post', action='/salvapron3')
         table.table-bordered
             thead
                 tr
@@ -36,20 +36,20 @@ block mainbar
                                     if opt.cod_partita == item.cod_partita
                                         if opt.value == item.sq_casa
                                             option(value="#{opt.value}", selected)
-                                            |#{opt.value}
+                                            |opt.value
                                         else
                                             option(value="#{opt.value}")
-                                            |#{opt.value}
+                                            |opt.value
                         td
                             select.GH(name="GH-#{item.cod_partita})
                                 - each opt in opt2
                                     if opt.cod_partita == item.cod_partita
                                         if opt.value == item.sq_away
                                             option(value="#{opt.value}", selected)
-                                            | #{opt.value}
+                                            | opt.value
                                         else
                                             option(value="#{opt.value}")
-                                            | #{opt.value}
+                                            | opt.value
                         td
                             input.G1(type="text" , name="G1-#{item.cod_partita}", value="#{item.pr_g_casa}")
                         td
