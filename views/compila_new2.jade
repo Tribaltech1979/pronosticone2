@@ -34,7 +34,7 @@ block mainbar
                             select.GC(name="GC-#{item.cod_partita})
                                 - each opt in opt2
                                     if opt.cod_partita == item.cod_partita
-                                        if opt.value == item.sq_casa
+                                        if opt.value == save_sq_casa
                                             option(value="#{opt.value}", selected)
                                             |opt.value
                                         else
@@ -42,9 +42,9 @@ block mainbar
                                             |opt.value
                         td
                             select.GH(name="GH-#{item.cod_partita})
-                                - each opt in opt2
+                                - each opt in opt3
                                     if opt.cod_partita == item.cod_partita
-                                        if opt.value == item.sq_away
+                                        if opt.value == save_sq_away
                                             option(value="#{opt.value}", selected)
                                             | opt.value
                                         else

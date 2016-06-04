@@ -428,47 +428,41 @@ router.post('/signin',function(req,res){
         var insquery = "INSERT INTO Utenti set UTE_MAIL = '"+username+"',UTE_PASS = '"+password+"' ;";
         
         console.log(insquery);
-
-        connection.query(insquery, function (err,ris1) {
-            if(!err){
-
-                    req.session.utente = ris1.insertId;
+        connection.beginTransaction(function(err){
+            connection.query(insquery,function(err,ris1){
+                if(!err){
+                    req.session.utente= ris1.insertId;
                     var id_squadra = ris1.insertId;
                     var ulog = new usrlog(pool,req.session.utente,"NEW USER","REGISTRATI");
-
                     var ins_squ = "Insert Squadre values ( "+id_squadra+", '"+sq_name+"', '"+email+"', '"+image+"', '"+check+"');";
-                    connection.query(ins_squ, function(err,ris_ins){
-                        if(ris_ins.affectedRows){
+                    connection.query(ins_squ,function(err,ris_ins){
+                        if(!err){
                             var upd_ute = "Update Utenti set UTE_ID_SQUADRA = "+id_squadra+" WHERE UTE_COD_UTENTE = "+id_squadra;
-                            connection.query(upd_ute, function (err, ris_upd) {
-                                if(ris_upd.affectedRows){
-                                    connection.release();
+                            connection.query(upd_ute,function(err,ris_upd){
+                                if(!err){
+                                    connection.commit();
                                     res.redirect('/gettorneo');
                                 }
                                 else{
-                                    var del_sq = "Delete from Squadre Where SQ_ID_SQUADRA = " +id_squadra;
-                                    connection.query(del_sq,function(err,ris){
-                                        connection.release();
-                                        res.redirect('/signin');
-                                    })
+                                    var ulog = new usrlog(pool,0,"NEW USER",err.code);
+                                    connection.rollback(); 
                                 }
                             });
                         }
                         else{
-                            connection.release();
-                            res.redirect('/signin');
+                            var ulog = new usrlog(pool,0,"NEW USER",err.code);
+                            connection.rollback(); 
                         }
-
                     });
-
-            }
-            else{
-                connection.release();
-            }
+                    
+                }
+                else{
+                    var ulog = new usrlog(pool,0,"NEW USER",err.code);
+                    connection.rollback();
+                }
+            });
+            connection.rollback();
         });
-
-    });
-
 
 
 });
@@ -482,7 +476,7 @@ router.get('/gettorneo',function(req,res){
     var pool = req.pool;
     var id = req.session.utente;
 
-    var new_tor = "select * from Torneo where TOR_ARCH <> 'X' and curdate() <= TOR_DATA_VAL and TOR_COD_TORNEO NOT IN ( select cod_torneo from v_torneo where id_squadra = "+id+" )";
+    var new_tor = "select * from Torneo where TOR_ARC is null and convert_tz(sysdate(),'-1:00','+1:00') < TOR_DATA_LIM and TOR_COD_TORNEO NOT IN ( select cod_torneo from v_torneo where id_squadra = "+id+" )";
 
     pool.getConnection(function(err,connection){
         connection.query(new_tor,function(err,ris){
@@ -507,7 +501,7 @@ router.get('/addtorneo',function(req,res){
     var pool = req.pool;
     var id = req.session.utente;
 
-    var new_tor = "select * from Torneo where TOR_ARCH <> 'X' and curdate() <= TOR_DATA_VAL and TOR_COD_TORNEO NOT IN ( select cod_torneo from v_torneo where id_squadra = "+id+" )";
+   var new_tor = "select * from Torneo where TOR_ARC is null and convert_tz(sysdate(),'-1:00','+1:00') < TOR_DATA_LIM and TOR_COD_TORNEO NOT IN ( select cod_torneo from v_torneo where id_squadra = "+id+" )";
 
     pool.getConnection(function(err,connection){
         connection.query(new_tor,function(err,ris){
@@ -515,7 +509,7 @@ router.get('/addtorneo',function(req,res){
             if( Array.isArray(ris)) {
                 var tmquery = "select * from v_squadre where cod_ute = "+id;
                 connection.query(tmquery,function(err, ris2){
-
+                    
                     connection.release();
                     res.render('addtor',{
                         "torneo" : ris,
@@ -542,23 +536,49 @@ router.get('/addtor*',function(req,res){
     var tid = req.query.tid;
 
     pool.getConnection(function(err,connection){
-
-        var q_tor = "select * from Torneo where TOR_COD_TORNEO = "+ connection.escape(tid);
-        connection.query(q_tor,(function(err,ris1){
-            if(Array.isArray(ris1)){
-                if(ris1[0].TOR_TIPO_TORNEO ==4)
-                {
-                    var query = "Insert into Partecipanti values ("+ris1[0].TOR_COD_TORNEO+","+id+")";
-                    //// TO DO - GENERO PRONOSTICO
-                }
-
+        connection.beginTransaction(function(err){
+            if(!err){
+                var q_tor = "select * from Torneo where TOR_COD_TORNEO = "+ tid;
+                connection.query(q_tor,function(err,ris1){
+                    if(Array.isArray(ris1)){
+                        if(ris1[0].TOR_TIPO_TORNEO == 4){
+                            var Partquery = "Insert into Partecipanti SET PAR_COD_TORNEO = "+ris1[0].TOR_COD_TORNEO+", PAR_COD_SQUADRA = "+id+")";
+                            connection.query(Partquery,function(err, risq){
+                               if(!err){
+                                    /// GENERO PRONOSTICO
+                                   var genPron = "insert into Pronostico (select PP_COD_TORNEO,PP_COD_PARTITA, PAR_COD_SQUADRA ,null,null,null,null,null,null,null,null,null,null,null,null,null from Partite_Pronostico , Partecipanti where PP_COD_TORNEO = PAR_COD_TORNEO and pp_cod_torneo = "+ris1[0].TOR_COD_TORNEO+" and pp_nro_giornata in ( Select GIO_NRO_GIORNATA FROM Giornate where GIO_COD_TORNEO = "+ris1[0].TOR_COD_TORNEO+" ) and PAR_COD_SQUADRA = "+id+") ;";
+                                   /// GENERO CALENDARIO
+                                   var genCal = "insert into Calendario ( SELECT GIO_COD_TORNEO, GIO_NRO_GIORNATA, "+id+", "+ id+",null,null,null,null,null,null,null,null from Giornate where GIO_COD_TORNEO = " +ris1[0].TOR_COD_TORNEO+" ) ;";
+                                   
+                                   genPron = genPron + genCal ;
+                                   
+                                   connection.query(genPron,function(err,pronq){
+                                       if(!err){
+                                           connection.commit();
+                                       }
+                                       else{
+                                           connection.rollback();
+                                       }
+                                   });
+                               }
+                                else{
+                                    connection.rollback();
+                                }
+                            });
+                           
+                        }
+                    }
+                    else{
+                        connection.rollback();
+                    }
+                });
             }
-
-        })
-        );//qtor
-       //
-    });
-
+            else{
+                connection.rollback();
+            }
+            
+        });
+       
 });
 ///////////////////
 //// CAMBIO IMAGE

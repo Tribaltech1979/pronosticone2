@@ -50,6 +50,24 @@ block mainright
     h2 Partite Future
     div.list-group(style="max-height:300px;overflow-y:scroll;")
         each par, i in calendario
-            a.list-group-item(href="/partita?tid=#{par.cod_torneo}&ngio=#{par.nro_giornata}&npar=#{par.nro_partita}")
-                h4.list-group-item-heading #{par.sq_home}  VS  #{par.sq_away}
-                 p.list-group-item-text #{par.descr_torneo}  --  #{par.inizio} -  #{par.ora}
+            if par.save
+                if par.sq_away
+                    a.list-group-item(href="/partita?tid=#{par.cod_torneo}&ngio=#{par.nro_giornata}&npar=#{par.nro_partita}")
+                        h4.list-group-item-heading #{par.sq_home}  VS  #{par.sq_away}
+                            i.fa.fa-check-square-o(style="color:green")
+                        p.list-group-item-text #{par.descr_torneo}  --  #{par.inizio} -  #{par.ora}
+                else
+                    a.list-group-item(href="/partita?tid=#{par.cod_torneo}&ngio=#{par.nro_giornata}&npar=#{par.nro_partita}")
+                        h4.list-group-item-heading #{par.etichetta}
+                            i.fa.fa-check-square-o(style="color:green")
+                        p.list-group-item-text #{par.descr_torneo}  --  #{par.inizio} -  #{par.ora}
+            else
+                if par.sq_away
+                    a.list-group-item(href="/partita?tid=#{par.cod_torneo}&ngio=#{par.nro_giornata}&npar=#{par.nro_partita}")
+                        h4.list-group-item-heading #{par.sq_home}  VS  #{par.sq_away}
+                        p.list-group-item-text #{par.descr_torneo}  --  #{par.inizio} -  #{par.ora}
+                else
+                    a.list-group-item(href="/partita?tid=#{par.cod_torneo}&ngio=#{par.nro_giornata}&npar=#{par.nro_partita}")
+                        h4.list-group-item-heading #{par.etichetta}
+                        p.list-group-item-text #{par.descr_torneo}  --  #{par.inizio} -  #{par.ora}
+                
