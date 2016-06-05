@@ -210,7 +210,10 @@ router.post('/login',function(req,res){
         }
 
        // console.log('connected as id ' + connection.threadId);
-        var usrquery =  "select UTE_COD_UTENTE from Utenti where UTE_MAIL = '" + username + "' and UTE_PASS = '" +password+"'" ;
+        var usrquery =  "select UTE_COD_UTENTE from Utenti where UTE_MAIL = " + connection.escape(username) + " and UTE_PASS = " +connection.escape(password)+" ;";
+        
+       // console.log("usrQuery : "+usrquery);
+        
         connection.query(usrquery,function(err,rows){
             connection.release();
             if(!err) {
@@ -218,6 +221,7 @@ router.post('/login',function(req,res){
                     //console.log(rows[0]);
                     var ulog = new usrlog(pool,rows[0].UTE_COD_UTENTE,"LOGIN","OLD");
                     req.session.utente = rows[0].UTE_COD_UTENTE;
+                    req.session.id_squadra = rows[0].UTE_COD_UTENTE;
                     /*
                      var chk_torneo = "SELECT count(cod_torneo) as conto from v_torneo where cod_utente = " + req.session.utente +" AND arch <> 'X'";
                      connection.query(chk_torneo, function(err, ris){
@@ -381,7 +385,7 @@ router.post('/newsq',function(req,res){
 
         pool.getConnection(function(err, connection){
 
-            var ins_squ = "Insert Squadre values ( "+id_squadra+", '"+connection.escape(sq_name)+"', '"+connection.escape(email)+"', '"+ connection.escape(image) +"', '"+connection.escape(check)+"');";
+            var ins_squ = "Insert Squadre values ( "+id_squadra+", "+connection.escape(sq_name)+", "+connection.escape(email)+", "+ connection.escape(image) +", "+connection.escape(check)+");";
             connection.query(ins_squ, function(err,ris_ins){
                 if(ris_ins.affectedRows){
                     var upd_ute = "Update Utenti set UTE_ID_SQUADRA = "+id_squadra+" WHERE UTE_COD_UTENTE = "+id_squadra;
@@ -425,16 +429,16 @@ router.post('/signin',function(req,res){
 
     pool.getConnection(function(err,connection){
 
-        var insquery = "INSERT INTO Utenti set UTE_MAIL = '"+username+"',UTE_PASS = '"+password+"' ;";
+        var insquery = "INSERT INTO Utenti set UTE_MAIL = "+connection.escape(username)+",UTE_PASS = "+connection.escape(password)+" ;";
         
-        console.log(insquery);
+        //console.log(insquery);
         connection.beginTransaction(function(err){
             connection.query(insquery,function(err,ris1){
                 if(!err){
                     req.session.utente= ris1.insertId;
                     var id_squadra = ris1.insertId;
                     var ulog = new usrlog(pool,req.session.utente,"NEW USER","REGISTRATI");
-                    var ins_squ = "Insert Squadre values ( "+id_squadra+", '"+sq_name+"', '"+email+"', '"+image+"', '"+check+"');";
+                    var ins_squ = "Insert Squadre values ( "+id_squadra+", "+connection.escape(sq_name)+", "+connection.escape(email)+", "+connection.escape(image)+", "+connection.escape(check)+");";
                     connection.query(ins_squ,function(err,ris_ins){
                         if(!err){
                             var upd_ute = "Update Utenti set UTE_ID_SQUADRA = "+id_squadra+" WHERE UTE_COD_UTENTE = "+id_squadra;
@@ -465,6 +469,7 @@ router.post('/signin',function(req,res){
         });
 
 
+});
 });
 
 
@@ -501,13 +506,13 @@ router.get('/addtorneo',function(req,res){
     var pool = req.pool;
     var id = req.session.utente;
 
-   var new_tor = "select * from Torneo where TOR_ARC is null and convert_tz(sysdate(),'-1:00','+1:00') < TOR_DATA_LIM and TOR_COD_TORNEO NOT IN ( select cod_torneo from v_torneo where id_squadra = "+id+" )";
+   var new_tor = "select * from Torneo where TOR_ARC is null and convert_tz(sysdate(),'-1:00','+1:00') < TOR_DATA_LIM and TOR_COD_TORNEO NOT IN ( select cod_torneo from v_torneo where cod_squadra = "+id+" )";
 
     pool.getConnection(function(err,connection){
         connection.query(new_tor,function(err,ris){
             
             if( Array.isArray(ris)) {
-                var tmquery = "select * from v_squadre where cod_ute = "+id;
+                var tmquery = "select * from v_torneo where cod_squadra = "+id+" order by cod_torneo desc";
                 connection.query(tmquery,function(err, ris2){
                     
                     connection.release();
@@ -538,23 +543,32 @@ router.get('/addtor*',function(req,res){
     pool.getConnection(function(err,connection){
         connection.beginTransaction(function(err){
             if(!err){
-                var q_tor = "select * from Torneo where TOR_COD_TORNEO = "+ tid;
+                var q_tor = "select * from Torneo where TOR_COD_TORNEO = "+ connection.escape(tid);
+                console.log("qtor "+q_tor );
                 connection.query(q_tor,function(err,ris1){
                     if(Array.isArray(ris1)){
                         if(ris1[0].TOR_TIPO_TORNEO == 4){
-                            var Partquery = "Insert into Partecipanti SET PAR_COD_TORNEO = "+ris1[0].TOR_COD_TORNEO+", PAR_COD_SQUADRA = "+id+")";
+                            var Partquery = "Insert into Partecipanti SET PAR_COD_TORNEO = "+ris1[0].TOR_COD_TORNEO+", PAR_COD_SQUADRA = "+id;
+                            
+                            console.log("Part q : "+ Partquery);
+                            
                             connection.query(Partquery,function(err, risq){
                                if(!err){
                                     /// GENERO PRONOSTICO
                                    var genPron = "insert into Pronostico (select PP_COD_TORNEO,PP_COD_PARTITA, PAR_COD_SQUADRA ,null,null,null,null,null,null,null,null,null,null,null,null,null from Partite_Pronostico , Partecipanti where PP_COD_TORNEO = PAR_COD_TORNEO and pp_cod_torneo = "+ris1[0].TOR_COD_TORNEO+" and pp_nro_giornata in ( Select GIO_NRO_GIORNATA FROM Giornate where GIO_COD_TORNEO = "+ris1[0].TOR_COD_TORNEO+" ) and PAR_COD_SQUADRA = "+id+") ;";
                                    /// GENERO CALENDARIO
-                                   var genCal = "insert into Calendario ( SELECT GIO_COD_TORNEO, GIO_NRO_GIORNATA, "+id+", "+ id+",null,null,null,null,null,null,null,null from Giornate where GIO_COD_TORNEO = " +ris1[0].TOR_COD_TORNEO+" ) ;";
+                                   var genCal = "insert into Calendario ( SELECT GIO_COD_TORNEO, GIO_NRO_GIORNATA, "+id+", "+ id+",0,null,null,null,null,null,null,null from Giornate where GIO_COD_TORNEO = " +ris1[0].TOR_COD_TORNEO+" ) ;";
+                                   /// GENERO PRONOSTICO_EX
+                                   var genPX = "INSERT into Pronostico_ex (SELECT GIO_COD_TORNEO, "+id+", PP_COD_PARTITA, null , null from Giornate, Partite_Pronostico where GIO_COD_TORNEO = PP_COD_TORNEO and GIO_NRO_GIORNATA = PP_NRO_GIORNATA and GIO_TIPO > 1) ;";
                                    
-                                   genPron = genPron + genCal ;
+                                   genPron = genPron + genCal + genPX;
+                                   
+                                   console.log("GEN : " + genPron );
                                    
                                    connection.query(genPron,function(err,pronq){
                                        if(!err){
                                            connection.commit();
+                                           res.redirect('/utente');
                                        }
                                        else{
                                            connection.rollback();
@@ -579,6 +593,7 @@ router.get('/addtor*',function(req,res){
             
         });
        
+});
 });
 ///////////////////
 //// CAMBIO IMAGE
@@ -685,7 +700,7 @@ router.get('/partita*', function(req, res){
 
 
     if (req.session.utente){
-            var sess_par = new my_par(res, pool, tid, ngio, npar,req.session.utente,req.session.id_squadra);
+            var sess_par = new my_par(res, pool, tid, ngio, npar,req.session.utente,req.session.utente);
         sess_par.init();
         sess_par.render();
     }
@@ -792,8 +807,10 @@ router.post('/salvapron2',function(req, res){
     //var t10 = JSON.parse(req.body.tab10);
     //var t11 = JSON.parse(req.body.tab11);
     var q_pp = "SELECT * FROM Partite_Pronostico  WHERE PP_COD_TORNEO = " + tid + " AND PP_NRO_GIORNATA = "+ngio;
+    
 
-   // console.log(t10);
+    //console.log(t9);
+    console.log(req.session.id_squadra);
 
     if (req.session.id_squadra){
         pool.getConnection(function(err,connection){
@@ -812,12 +829,13 @@ router.post('/salvapron2',function(req, res){
                     var index;
                     for (index = 0; index < rows.length; index++){
                         var part = rows[index].PP_COD_PARTITA;
-                        var q_up = "UPDATE Pronostico SET PRO_GOL_HOME = "+ t1[part]+ ", PRO_GOL_AWAY = "+ t2[part]+", PRO_SEGNO = "+t9[part]+", PRO_NRO_GOL = "+t6[part]+" , PRO_SAVE = 'X', PRO_SAVE_DATA = NOW()";
+                        var q_up = "UPDATE Pronostico SET PRO_GOL_HOME = "+ t1[part]+ ", PRO_GOL_AWAY = "+ t2[part]+", PRO_SEGNO = "+t9[part]+", PRO_NRO_GOL = "+t6[part]+" , PRO_SAVE = 'X', PRO_DATA_SAVE = SYSDATE()";
                         var wh = " WHERE PRO_COD_TORNEO = " + tid + " AND PRO_COD_PARTITA = "+part +" AND PRO_COD_UTENTE = "+  req.session.id_squadra;
-                        var upd = q_up + q_up2+ wh;
+                        var upd = q_up + wh;
                         upd_q = upd_q + upd + ";"
                     }
-                   // console.log(upd_q);
+                    
+                   console.log(upd_q);
                     pool.getConnection(function(err,connection){
                         if (err) {
                             connection.release();
@@ -887,14 +905,14 @@ router.post('/salvapron3',function(req, res){
                     var index;
                     for (index = 0; index < rows.length; index++){
                         var part = rows[index].PP_COD_PARTITA;
-                        var q_up = "UPDATE Pronostico SET PRO_GOL_HOME = "+ t1[part]+ ", PRO_GOL_AWAY = "+ t2[part]+", PRO_SEGNO = "+t9[part]+", PRO_NRO_GOL = "+t6[part]+" , PRO_SAVE = 'X', PRO_SAVE_DATA = NOW()";
+                        var q_up = "UPDATE Pronostico SET PRO_GOL_HOME = "+ t1[part]+ ", PRO_GOL_AWAY = "+ t2[part]+", PRO_SEGNO = "+t9[part]+", PRO_NRO_GOL = "+t6[part]+" , PRO_SAVE = 'X', PRO_DATA_SAVE = NOW()";
                         var wh = " WHERE PRO_COD_TORNEO = " + tid + " AND PRO_COD_PARTITA = "+part +" AND PRO_COD_UTENTE = "+  req.session.id_squadra;
-                        var upd = q_up + q_up2+ wh;
+                        var upd = q_up + wh;
                         upd_q = upd_q + upd + ";"
-                        var insq = "INSERT Pronostico_ex VALUES ("+tid+","+req.session.id_squadra+","+part+",'"+t12[part]+"','"+t13[part]+"');";
-                        upd_q = udp_q + insq;
+                        var insq = "UPDATE Pronostico_ex SET PX_RIS_HOME ='"+t12[part]+"', PX_RIS_AWAY = '"+t13[part]+"' WHERE PX_TID = "+tid+" AND PX_UTE = "+req.session.id_squadra+" AND PX_PAR = "+part+" ;";
+                        upd_q = upd_q + insq;
                     }
-                   // console.log(upd_q);
+                    //console.log(upd_q);
                     pool.getConnection(function(err,connection){
                         if (err) {
                             connection.release();
@@ -923,6 +941,85 @@ router.post('/salvapron3',function(req, res){
 
 });
 
+///////////
+//// SALVAPRON 4 VINCITORE SECCO
+////////////
+router.post('/salvapron4',function(req,res){
+    //////////////////
+    var pool = req.pool;
+    var tid = req.body.torneo;
+    var ngio = req.body.giorn;
+  //  var t1 = JSON.parse(req.body.tab1);
+//    var t2 = JSON.parse(req.body.tab2);
+ //   var t3 = JSON.parse(req.body.tab3);
+    //var t4 = JSON.parse(req.body.tab4);
+//    var t5 = JSON.parse(req.body.tab5);
+  //  var t6 = JSON.parse(req.body.tab6);
+  //  var t7 = JSON.parse(req.body.tab7);
+    //var t8 = JSON.parse(req.body.tab8);
+    //var t9 = JSON.parse(req.body.tab9);
+    //var t10 = JSON.parse(req.body.tab10);
+    //var t11 = JSON.parse(req.body.tab11);
+    var t12 = JSON.parse(req.body.tab12); //casa
+    //var t13 = JSON.parse(req.body.tab13);// away
+    var q_pp = "SELECT * FROM Partite_Pronostico  WHERE PP_COD_TORNEO = " + tid + " AND PP_NRO_GIORNATA = "+ngio;
+
+   // console.log(t10);
+
+    if (req.session.id_squadra){
+        pool.getConnection(function(err,connection){
+            if (err) {
+                connection.release();
+                res.json({"code" : 100, "status" : "Error in connection database"});
+                return;
+            }
+
+          // console.log('connected as id ' + connection.threadId);
+
+            connection.query(q_pp,function(err,rows){
+                //console.log(rows.length);
+                connection.release();
+                if(!err) {
+                    var upd_q = '';
+                    var index;
+                    for (index = 0; index < rows.length; index++){
+                        
+                        var part = rows[index].PP_COD_PARTITA;
+                        //console.log(part);
+                        var q_up = "UPDATE Pronostico SET PRO_SAVE = 'X', PRO_DATA_SAVE = NOW()";
+                        var wh = " WHERE PRO_COD_TORNEO = " + tid + " AND PRO_COD_PARTITA = "+part +" AND PRO_COD_UTENTE = "+  req.session.id_squadra;
+                        var upd = q_up + wh;
+                        upd_q = upd_q + upd + ";"
+                        var insq = "UPDATE Pronostico_ex SET PX_RIS_HOME ='"+t12[part]+"'WHERE PX_TID = "+tid+" AND PX_UTE = "+req.session.id_squadra+" AND PX_PAR = "+part+" ;";
+                        upd_q = upd_q + insq;
+                    }
+                    
+                    
+                    pool.getConnection(function(err,connection){
+                        if (err) {
+                            connection.release();
+                            res.json({"code" : 100, "status" : "Error in connection database"});
+                            return;
+                        }
+                        connection.query(upd_q,function(err2) {
+                            connection.release();
+                            if (!err2) {
+                                res.send('OK');
+                            }
+                        });
+                    });
+                }
+            });
+
+            connection.on('error', function(err) {
+                res.json({"code" : 100, "status" : "Error in connection database"});
+
+            });
+        });
+    
+    }
+});
+/////////
 router.get('/ristorneo*', function(req, res, next) {
     var pool = req.pool;
     var tid = req.query.tid;

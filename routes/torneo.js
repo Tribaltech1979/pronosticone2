@@ -34,9 +34,9 @@ function Torneo(res, pool, tid,id_squadra, utente){
     this.title = '';
     this.image = '';
 
-}
 
-Torneo.prototype.init = function(){
+
+this.init = function(){
 
     this.db_class_query.getResult(function(row1){
     this.tipo_torneo = row1[0].TOR_TIPO_TORNEO;
@@ -114,10 +114,10 @@ Torneo.prototype.init = function(){
 
 };
 
-Torneo.prototype.render = function(){
+this.render = function(){
 
 
 };
-
+}
 
 module.exports = Torneo;

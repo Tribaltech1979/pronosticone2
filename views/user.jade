@@ -58,7 +58,7 @@ block mainright
                         p.list-group-item-text #{par.descr_torneo}  --  #{par.inizio} -  #{par.ora}
                 else
                     a.list-group-item(href="/partita?tid=#{par.cod_torneo}&ngio=#{par.nro_giornata}&npar=#{par.nro_partita}")
-                        h4.list-group-item-heading #{par.etichetta}
+                        h4.list-group-item-heading #{par.etichetta} &nbsp;&nbsp;&nbsp;&nbsp;
                             i.fa.fa-check-square-o(style="color:green")
                         p.list-group-item-text #{par.descr_torneo}  --  #{par.inizio} -  #{par.ora}
             else

@@ -14,6 +14,8 @@ function Partita(res, pool, tid, ngio, npar, utente, id_squadra){
     this.utente = utente;
     this.id_squadra = id_squadra;
     
+    console.log("id_squadra :"+id_squadra);
+    
     this.tipo = 0;
 
     var check1= "SELECT if ( convert_tz(sysdate(),'-1:00','+1:00') < addtime(GIO_DATA_INIZIO, GIO_ORA_INIZIO), 1,0) as CH1, if (sysdate()> GIO_DATA_FINE,1,0) as CH2 , ifnull(GIO_TIPO,0) as tipo FROM Giornate where GIO_COD_TORNEO = "+ this.tid + " and GIO_NRO_GIORNATA = "+ this.ngio;
@@ -48,6 +50,8 @@ this.init = function() {
     var rows0 = {};
 
     this.db_check1.getResult(function(res){
+    if(!res.length){this.res.redirect('/utente');}
+        else{
         this.checkOrario = res[0].CH1;
         this.tipo = res[0].tipo;
 
@@ -55,8 +59,10 @@ this.init = function() {
         this.db_check2.getResult(function(res){
         this.cod_home = res[0].CAL_COD_HOME;
         this.cod_away = res[0].CAL_COD_AWAY;
-
-            if(tipo == 0){
+          //  console.log("tipo :"+this.tipo);
+        //    console.log("id_squadra :"+this.id_squadra);
+          //  console.log("cod_home :"+this.cod_home);
+            if(this.tipo == 0){
                 if(this.checkOrario == 1) {
                     /// Prima dell'inizio
                     if (
@@ -123,7 +129,7 @@ this.init = function() {
                 }
 
             }
-            else if (tipo == 1){
+            else if (this.tipo == 1){
                 if(this.checkOrario == 1) {
                     /// Prima dell'inizio
                     if (this.id_squadra == this.cod_home)
@@ -141,8 +147,10 @@ this.init = function() {
                                 var nextg = 0;
                                 
                                 if(res_max[0].gmax > this.ngio){
-                                    nextg = this.ngio + 1;
+                                    nextg = parseInt(1) + parseInt(this.ngio);
                                 }
+                                
+                                console.log("next g: "+nextg);
                                 
                                 this.res.render('compila_new', {
                                 'title': "Inserimento risultati",
@@ -160,7 +168,7 @@ this.init = function() {
                         }.bind(this)); //rows4
                     }
                     else {
-                        res.render('aspetta', {
+                        this.res.render('aspetta', {
                             'title': "Partita ancora da disputare"
                         });
                     }
@@ -178,7 +186,7 @@ this.init = function() {
 
 
                                 this.res.render('risultato_new',{
-                                    "title" : rows0[0].sq_home+" VS "+rows0[0].sq_away,
+                                    "title" : "Visualizza Pronosticone",
                                     "cod_torneo" : this.tid,
                                     "home": rows2,
                                 });
@@ -187,36 +195,48 @@ this.init = function() {
                 }
 
             }
-            else if (tipo == 2){
+            else if (this.tipo == 2){
              if (this.checkOrario == 1){
-                 if (this.squadra == this.cod_home){
-                                           //rows4 = this.db_pron.row;
-                        this.db_pron.getResult(function(res){
-                            rows4 = res;
-
+                 if (this.id_squadra == this.cod_home){
+                        var query_comp = "select * from v_compila_2 where cod_torneo = "+this.tid+" and nro_giornata = "+this.ngio+" and pr_squadra = "+this.id_squadra;
+                        
+                       // console.log(this.pool);
+                        //console.log(query_comp);
+                     
+                        var db_query_comp = new dbw(this.pool, query_comp);
+                        db_query_comp.getResult(function(res){
+                            var rows4 = res;
+                            
+                            //console.log(rows4);
+                            
                             var next_q = "Select max(GIO_NRO_GIORNATA) as gmax from Giornate where GIO_COD_TORNEO = "+this.tid;
                             var db_next_q = new dbw(this.pool,next_q);
                             
                             db_next_q.getResult(function(res_max){
                                 
-                                var is_saved = "select * from v_cal_save where "
+                                var select_values = "select PX_VALUE 'value' from Partite_ex_val where PX_COD_TORNEO = "+this.tid;
                                 
+                                db_select_values = new dbw(this.pool,select_values);
+                                db_select_values.getResult(function(opt){
+                                    
                                 var nextg = 0;
                                 
                                 if(res_max[0].gmax > this.ngio){
-                                    nextg = this.ngio + 1;
+                                    nextg = parseInt(1) + parseInt(this.ngio);
                                 }
                                 
                                 this.res.render('compila_new2', {
                                 'title': "Inserimento risultati",
                                 'htab': rows4,
-                                'opt2': opt_2,
-                                'opt3': opt_3,    
+                                'opt1': opt,    
                                 'cod_torneo': this.tid,
                                 'nro_giorn': this.ngio,
                                 'next_g' : nextg,
                                 'par' : this.id_squadra    
-                            });
+                                    
+                                });
+                                
+                            }.bind(this));
                                 
                             }.bind(this));
 
@@ -225,18 +245,110 @@ this.init = function() {
                         }.bind(this)); //rows4
                  }
                  else{
-                     
+                                    
+                        this.res.render('aspetta', {
+                            'title': "Partita ancora da disputare"
+                        });
+                    
                  }
              }
                 else{
-                    
+                         /// Dopo l'inizio
+                    var p_query_h = "Select * from v_compila_2 where cod_torneo = "+this.tid+" and nro_giornata = "+this.ngio+" and pr_squadra = "+this.cod_home+" ;";
+
+
+
+                        var db_query_h = new dbw(this.pool,p_query_h);
+                        //rows2 = db_query_h.row;
+                        db_query_h.getResult(function(res){
+                            rows2=res;
+
+
+                                this.res.render('risultato_new2',{
+                                    "title" : "Visualizza Pronostico",
+                                    "cod_torneo" : this.tid,
+                                    "home": rows2,
+                                });
+                        }.bind(this)); //p_query_h
+
                 }
             }
-            else if (tipo == 3){
-                
+            else if (this.tipo == 3){
+                            if (this.checkOrario == 1){
+                 if (this.id_squadra == this.cod_home){
+                        var query_comp = "select * from v_compila_2 where cod_torneo = "+this.tid+" and nro_giornata = "+this.ngio+" and pr_squadra = "+this.cod_home;
+                     
+                        var db_query_comp = new dbw(this.pool, query_comp);
+                        db_query_comp.getResult(function(res){
+                            rows4 = res;
+
+                            var next_q = "Select max(GIO_NRO_GIORNATA) as gmax from Giornate where GIO_COD_TORNEO = "+this.tid;
+                            var db_next_q = new dbw(this.pool,next_q);
+                            
+                            db_next_q.getResult(function(res_max){
+                                
+                                var select_values = "select PX_VALUE 'value' from Partite_ex_val where PX_COD_TORNEO = "+this.tid;
+                                
+                                db_select_values = new dbw(this.pool,select_values);
+                                db_select_values.getResult(function(opt){
+                                    
+                                var nextg = 0;
+                                
+                                if(res_max[0].gmax > this.ngio){
+                                    nextg = parseInt(1) + parseInt(this.ngio);
+                                }
+                                
+                                this.res.render('compila_new3', {
+                                'title': "Inserimento risultati",
+                                'htab': rows4,
+                                'opt1': opt,    
+                                'cod_torneo': this.tid,
+                                'nro_giorn': this.ngio,
+                                'next_g' : nextg,
+                                'par' : this.id_squadra    
+                                    
+                                });
+                                
+                            }.bind(this));
+                                
+                            }.bind(this));
+
+
+                            
+                        }.bind(this)); //rows4
+                 }
+                 else{
+                                    
+                        this.res.render('aspetta', {
+                            'title': "Partita ancora da disputare"
+                        });
+                    
+                 }
+             }
+                else{
+                         /// Dopo l'inizio
+                    var p_query_h = "Select * from v_compila_2 where cod_torneo = "+this.tid+" and nro_giornata = "+this.ngio+" and pr_squadra = "+this.cod_home+" ;";
+
+
+
+                        var db_query_h = new dbw(this.pool,p_query_h);
+                        //rows2 = db_query_h.row;
+                        db_query_h.getResult(function(res){
+                            rows2=res;
+
+
+                                this.res.render('risultato_new3',{
+                                    "title" : "Visualizza Pronostico",
+                                    "cod_torneo" : this.tid,
+                                    "home": rows2,
+                                });
+                        }.bind(this)); //p_query_h
+
+                }
             }
 
         }.bind(this)); //check2
+    }
     }.bind(this)); //check1
    // check2 = this.db_check2.row;
 
@@ -244,7 +356,7 @@ this.init = function() {
 
 };
 
-Partita.prototype.render = function(){
+this.render = function(){
 
 
 

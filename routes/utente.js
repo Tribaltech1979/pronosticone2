@@ -42,7 +42,7 @@ this.init = function(){
     tor_query = tor_query +" where cod_torneo = GIO_COD_TORNEO";
     tor_query = tor_query +" and cod_squadra =  "+this.id_squadra;
 
-    var cal_query = "select *, date_format(dt_inizio,'%d/%m/%Y')'inizio',TIME_FORMAT(ora_inizio,'%H:%i')'ora', PRO_SAVE 'save' from v_global_calen, v_cal_save where PRO_COD_TORNEO = cod_torneo and GIO_NRO_GIORNATA = nro_giornata and punti_home is null and ( cod_home = " + this.id_squadra + " or cod_away = " + this.id_squadra +" ) order by dt_inizio";
+    var cal_query = "select v_global_calen.*, date_format(dt_inizio,'%d/%m/%Y')'inizio',TIME_FORMAT(ora_inizio,'%H:%i')'ora', sav.PRO_SAVE 'save' , g.GIO_ETICHETTA 'etichetta' from v_global_calen, v_cal_save sav , Giornate g where sav.PRO_COD_TORNEO = cod_torneo and sav.GIO_NRO_GIORNATA = nro_giornata and cod_torneo = g.GIO_COD_TORNEO and nro_giornata = g.GIO_NRO_GIORNATA and punti_home is null and ( cod_home = " + this.id_squadra + " or cod_away = " + this.id_squadra +" ) order by dt_inizio";
 
     var cal_past = "select *, date_format(dt_inizio,'%d/%m/%Y')'inizio',TIME_FORMAT(ora_inizio,'%H:%i')'ora' from v_global_calen where punti_home is not null and ( cod_home = " + this.id_squadra + " or cod_away = " + this.id_squadra +" ) order by dt_inizio desc";
 
