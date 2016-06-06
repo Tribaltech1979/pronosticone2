@@ -8,6 +8,8 @@ $(document).ready(function () {
 
 });
 
+var user ;
+var mail ;
 
 function checkSubmit(){
     $(".alert").hide();
@@ -25,13 +27,16 @@ function checkSubmit(){
     if($(".G2").val() != $(".G3").val()){
         $(".G2,.G3").css('background-color','red');
     }
+    
+    
 
     $.post('/checkuser',{
         username : $(".G1").val()
     },function(data){
-        var result = jQuery.parseJSON(data);
-
-        if (result.status = 'success'){
+       // var result = JSON.parse(data);
+        user = data;
+        console.log("risposta  "+data.stato);
+        if (data.stato = 'success'){
             $(".G1").css('background-color','green');
         }
         else{
@@ -40,16 +45,17 @@ function checkSubmit(){
         }
     });
 
+
     $.post('/checkmail',{
         mail : $(".G4").val()
     },function(data){
-        var result = jQuery.parseJSON(data);
-
-        if (result.status = 'success'){
-            $(".G1").css('background-color','green');
+       // var result = JSON.parse(data);
+        mail = data ;
+        if (data.stato = 'success'){
+            $(".G4").css('background-color','green');
         }
         else{
-            $(".G1").css('background-color','red');
+            $(".G4").css('background-color','red');
             good = false;
         }
     });
@@ -57,6 +63,7 @@ function checkSubmit(){
 
     return good;
 }
+
 
 
 function valida(){
@@ -69,12 +76,13 @@ function valida(){
         if($(".G5").is(':checked')){
             checkb = 'X';
         }
-        $.post('/signin',{
-            squadra :sq,
-            image : image,
-            email : mail,
-            chk : checkb,
-            password : pass
-        });
+    //    $.post('/signin',{
+      //      squadra :sq,
+        //    image : image,
+          //  email : mail,
+            //chk : checkb,
+            //password : pass
+        //});
+        $("form").submit();
     }
 }

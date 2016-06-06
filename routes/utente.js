@@ -28,6 +28,12 @@ this.init = function(){
     //console.log(this.pool, this.tmquery);
     var db_tmquery = new dbw(this.pool, this.tmquery);
     db_tmquery.getResult(function(res){
+        if(!res.length){
+            console.log(this.ute);
+            
+            this.res.redirect('/');
+        }
+        else{
          console.log("squadra in :" + res[0].id_squadra);
     this.id_squadra = res[0].id_squadra;
     this.nome_squadra =res[0].nome_squadra;   
@@ -42,9 +48,9 @@ this.init = function(){
     tor_query = tor_query +" where cod_torneo = GIO_COD_TORNEO";
     tor_query = tor_query +" and cod_squadra =  "+this.id_squadra;
 
-    var cal_query = "select v_global_calen.*, date_format(dt_inizio,'%d/%m/%Y')'inizio',TIME_FORMAT(ora_inizio,'%H:%i')'ora', sav.PRO_SAVE 'save' , g.GIO_ETICHETTA 'etichetta' from v_global_calen, v_cal_save sav , Giornate g where sav.PRO_COD_TORNEO = cod_torneo and sav.GIO_NRO_GIORNATA = nro_giornata and cod_torneo = g.GIO_COD_TORNEO and nro_giornata = g.GIO_NRO_GIORNATA and punti_home is null and ( cod_home = " + this.id_squadra + " or cod_away = " + this.id_squadra +" ) order by dt_inizio";
+    var cal_query = "select v_global_calen.*, date_format(dt_inizio,'%d/%m/%Y')'inizio',TIME_FORMAT(ora_inizio,'%H:%i')'ora', sav.PRO_SAVE 'save' from v_global_calen, v_cal_save sav where sav.PRO_COD_TORNEO = cod_torneo and sav.GIO_NRO_GIORNATA = nro_giornata and sav.PRO_COD_UTENTE = "+this.id_squadra +" and punti_home is null and ( cod_home = " + this.id_squadra + " or cod_away = " + this.id_squadra +" ) order by dt_inizio, nro_giornata";
 
-    var cal_past = "select *, date_format(dt_inizio,'%d/%m/%Y')'inizio',TIME_FORMAT(ora_inizio,'%H:%i')'ora' from v_global_calen where punti_home is not null and ( cod_home = " + this.id_squadra + " or cod_away = " + this.id_squadra +" ) order by dt_inizio desc";
+    var cal_past = "select *, date_format(dt_inizio,'%d/%m/%Y')'inizio',TIME_FORMAT(ora_inizio,'%H:%i')'ora' from v_global_calen where punti_home is not null and ( cod_home = " + this.id_squadra + " or cod_away = " + this.id_squadra +" ) order by dt_inizio desc, nro_giornata";
 
 
     var db_tor_query = new dbw(this.pool, tor_query);
@@ -73,7 +79,8 @@ this.init = function(){
             
     }.bind(this));
     }.bind(this));    
-    }.bind(this));    
+    }.bind(this));
+        }
     }.bind(this));
 };
 

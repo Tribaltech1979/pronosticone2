@@ -12,17 +12,17 @@ block content
         a.close(href='#',data-dismiss='alert', aria-label='close') &times;
         |<strong> Successo </strong> Salvataggio completo
 block mainleft
-    form(name='cambia',id="cambia" , method='post', action='/signin')
+    form(name='cambia',id="form_signin" , method='post', action='/signin')
         table.table
             tbody
                 tr
                     td Nome Squadra
                     td
-                        input.G1(type="text" , name="G1", value="")
+                        input.G1(type="text" , name="squadra", value="")
                 tr
                     td Password
                     td
-                        input.G2(type="password" , name="G2", value="")
+                        input.G2(type="password" , name="password", value="")
                 tr
                     td Ripeti Password
                     td
@@ -30,10 +30,10 @@ block mainleft
                 tr
                     td Email
                     td
-                        input.G4(type="email" , name="G3", value="")
+                        input.G4(type="email" , name="email", value="")
                 tr
                     td Promemoria
                     td
-                        input.G5(type="checkbox" , name="G3", value="Attiva")
+                        input.G5(type="checkbox" , name="checkb", value="Attiva")
     div.btn-group-vertical
         a.btn.btn-info(onclick="valida()") Registrati

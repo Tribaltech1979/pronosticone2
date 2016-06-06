@@ -112,7 +112,7 @@ this.init = function(){
     }
     else if (this.tipo_torneo == 4)
     {
-        var class_q = "Select * from v_classifica_ex where cod_toreo = "+tid;
+        var class_q = "Select * from classifica_ex where cod_torneo = "+tid+" order by punti desc";
         var db_class_q = new dbw(this.pool, class_q);
 
         db_class_q.getResult(function(r_clas){
