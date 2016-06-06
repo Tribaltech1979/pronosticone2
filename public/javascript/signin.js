@@ -26,6 +26,34 @@ function checkSubmit(){
         $(".G2,.G3").css('background-color','red');
     }
 
+    $.post('/checkuser',{
+        username : $(".G1").val()
+    },function(data){
+        var result = jQuery.parseJSON(data);
+
+        if (result.status = 'success'){
+            $(".G1").css('background-color','green');
+        }
+        else{
+            $(".G1").css('background-color','red');
+            good = false;
+        }
+    });
+
+    $.post('/checkmail',{
+        mail : $(".G4").val()
+    },function(data){
+        var result = jQuery.parseJSON(data);
+
+        if (result.status = 'success'){
+            $(".G1").css('background-color','green');
+        }
+        else{
+            $(".G1").css('background-color','red');
+            good = false;
+        }
+    });
+
 
     return good;
 }

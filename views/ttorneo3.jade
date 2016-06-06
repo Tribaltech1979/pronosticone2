@@ -1,0 +1,35 @@
+//
+   Created by schiappacassed on 06/06/2016.
+
+extends layout
+block content
+    h1.text-left Classifica #{title} &nbsp;
+        div.btn-group
+            button.btn.btn-default.dropdown-toggle(data-toggle="dropdown",aria-haspopup="true",aria-expanded="false")
+                span.glyphicon.glyphicon-cog
+            ul.dropdown-menu
+                li
+                    a(href="/addtorneo")
+                        span.glyphicon.glyphicon-plus-sign
+                        |&nbsp; Aggiungi Torneo
+                li
+                    a(href="/gestsq")
+                        span.glyphicon.glyphicon-list
+                        |&nbsp; Opzioni
+                li
+                    a(href="/cambiop")
+                        span.glyphicon.glyphicon-sunglasses
+                        |&nbsp; Cambio Password
+                li.divider(role="separator")
+                li
+                    a(href="/logoff")
+                        span.glyphicon.glyphicon-off
+                        |&nbsp; Logoff
+block mainbar
+    h2.text-left I tuoi tornei
+    div.list-group(style="max-height: 300px; overflow-y:scroll;")
+        each user, i in pclass
+            a.list-group-item(href="/vistorneo?tid=#{user.cod_torneo}&uid=#{user.cod_utente}")
+                //img.img-thumbnail.pull-left(src="img/#{user.image}",width="50", height="65")
+                h4.list-group-item-heading &nbsp; #{user.nome_squadra}
+                p.list-group-item-text &nbsp; &nbsp; Vedi pronostico

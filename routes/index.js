@@ -366,6 +366,47 @@ router.get('/fbsignin',function(req,res){
 router.get('/signin',function(req,res){
     res.render('signin');
 });
+///////////////////////
+//////
+////////////////////////
+router.post('/checkuser',function(req,res){
+
+    var user = req.body.username;
+    var pool = req.pool;
+
+    pool.getConnection(function(err,connection){
+        var checkuser = "Select * from Utenti where UTE_MAIL = "+connection.escape(user);
+        connection.query(checkuser, function(req,res) {
+            if(!res.length){
+                res.json({status :'success'});
+            }
+            else{
+                res.json({status :'fail'});
+            }
+        });
+    });
+});
+
+///////////////////////
+//////
+////////////////////////
+router.post('/checkmail',function(req,res){
+
+    var user = req.body.email;
+    var pool = req.pool;
+
+    pool.getConnection(function(err,connection){
+        var checkuser = "Select * from Squadre where SQ_MAIL = "+connection.escape(user);
+        connection.query(checkuser, function(req,res) {
+            if(!res.length){
+                res.json({status :'success'});
+            }
+            else{
+                res.json({status :'fail'});
+            }
+        });
+    });
+});
 
 //////////////////
 ////// ins nuova squadra
