@@ -93,8 +93,8 @@ this.init = function(){
                         }
                         else {
                             this.res.render('ttorneo2', {
-                                "title": rows[0].TOR_DESCR_TORNEO,
-                                "image": rows[0].TOR_IMAGE,
+                                "title": this.title,
+                                "image": this.image,
                                 "numgiorn": this.massimo,
                                 "curgio": this.mgio,
                                 "padre": this.padre,
