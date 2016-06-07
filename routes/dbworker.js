@@ -48,6 +48,7 @@ this.getResult = function(callback){
     
     this.dbpool.getConnection(function(err,connection,result){
         connection.query(query,function(err,result){
+            connectione.release();
            // console.log(result);
 callback(result)
         });
