@@ -258,9 +258,9 @@ router.post('/login',function(req,res){
 ///// POST LOGIN FACEBOOK
 ////  Creo UTE_FB_ID
 ///////////////////////
-router.post('/fblogin',function (req,res, h) {
+router.get('/fblogin*',function (req,res) {
     var pool = req.pool;
-    var profilo = JSON.parse(req.body.profilo);
+    var profilo = req.user;
 
     req.session.fbprofilo = profilo ;
 
@@ -282,7 +282,8 @@ router.post('/fblogin',function (req,res, h) {
                     if(!err){
                         connection.query(usrquery,function(err, usr2){
                             connection.release();
-                            req.session.utente = usr2[0].UTE_COD_UTENTE;
+                            req.session.id_squadra = usr2[0].UTE_COD_UTENTE;
+                            req.session.id = usr2[0].UTE_COD_UTENTE;
                             var ulog = new usrlog(pool,req.session.utente,"NEW USER","FACEBOOK");
                             res.redirect('/getsquadra');
 
@@ -296,9 +297,9 @@ router.post('/fblogin',function (req,res, h) {
 
                 }else if(usr[0].UTE_ID_SQUADRA > 0) {
                 //// ha la squadra, verifico il torneo
-                req.session.utente = usr[0].UTE_COD_UTENTE;
+                req.session.id = usr[0].UTE_COD_UTENTE;
                 req.session.id_squadra = usr[0].UTE_ID_SQUADRA;
-                var chk_torneo = "SELECT count(cod_torneo) as conto from v_torneo where cod_utente = " + req.session.id_squadra +" AND arch <> 'X'";
+                var chk_torneo = "SELECT count(cod_torneo) as conto from v_torneo where cod_squadra= " + req.session.id_squadra +" AND archiviato is null";
                 connection.query(chk_torneo,function(err,chk1){
                     connection.release();
                     if(chk1[0].conto > 0)
@@ -308,7 +309,7 @@ router.post('/fblogin',function (req,res, h) {
                     }
                     else{
                         var ulog = new usrlog(pool,req.session.utente,"LOGIN","FACEBOOK-2");
-                        res.redirect('/gettorneo');
+                        res.redirect('/newtorneo');
                     }
                 });
 
@@ -318,7 +319,7 @@ router.post('/fblogin',function (req,res, h) {
             }else {
                 connection.release();
                 /// non ha la squadra
-                req.session.utente = usr[0].UTE_COD_UTENTE;
+                req.session.id_squadra = usr[0].UTE_COD_UTENTE;
                 var ulog = new usrlog(pool,req.session.utente,"LOGIN","FACEBOOK-3");
                 res.redirect('/getsquadra');
 
@@ -338,12 +339,13 @@ router.post('/fblogin',function (req,res, h) {
 ///////////////////
 router.get('/getsquadra',function(req,res){
 
-    var sq_name = req.session.profilo.name + " " +req.session.profilo.last_name;
-    var image = "http://graph.facebook.com/"+req.session.profilo.id+"/image";
+   var sq_name = req.user.displayName;
+  //  console.log(req.user);
+    var image = "http://graph.facebook.com/"+req.user.id+"/image";
     res.render('newsq', {
         "nome_sq": sq_name,
         "sq_image": image,
-        "sq_mail": req_session.profilo.email
+        "sq_mail": req.user.email
     });
 
 });
@@ -430,7 +432,11 @@ router.post('/newsq',function(req,res){
     var email = req.body.email;
     var check = req.body.chk;
 
-    var id_squadra = req.session.utente;
+    var id_squadra = req.session.id_squadra;
+    req.session.utente = id_squadra;
+    
+    console.log("id_squadra : "+id_squadra);
+    console.log("id :"+ req.session.id);
 
     if (id_squadra){
 
@@ -438,14 +444,18 @@ router.post('/newsq',function(req,res){
 
         pool.getConnection(function(err, connection){
 
-            var ins_squ = "Insert Squadre values ( "+id_squadra+", "+connection.escape(sq_name)+", "+connection.escape(email)+", "+ connection.escape(image) +", "+connection.escape(check)+");";
+            var ins_squ = "Insert into Squadre values ( "+id_squadra+", "+connection.escape(sq_name)+", "+connection.escape(email)+", "+ connection.escape(image) +", "+connection.escape(check)+", sysdate());";
             connection.query(ins_squ, function(err,ris_ins){
-                if(ris_ins.affectedRows){
+                if(!err){
                     var upd_ute = "Update Utenti set UTE_ID_SQUADRA = "+id_squadra+" WHERE UTE_COD_UTENTE = "+id_squadra;
                     connection.query(upd_ute, function (err, ris_upd) {
-                       if(ris_upd.affectedRows){
+                       if(!err){
                            connection.release();
-                           res.redirect('/gettorneo');
+                           req.session.id = id_squadra;
+                           req.session.id_squadra = id_squadra;
+                           
+                           res.redirect('/newtorneo');
+                           //res.redirect('');
                        }
                         else{
                            var del_sq = "Delete from Squadre Where SQ_ID_SQUADRA = " +id_squadra;
@@ -464,6 +474,9 @@ router.post('/newsq',function(req,res){
             });
 
         });
+    }
+    else{
+        res.status(500);
     }
 
 
@@ -527,7 +540,7 @@ router.post('/signin',function(req,res){
                                     console.log("changed rows : " + ris_upd.changedRows);
                                     
                                     req.session.utente= id_squadra;
-                                    res.redirect('/gettorneo');
+                                    res.redirect('/newtorneo');
                                 }
                                 else{
                                     var ulog = new usrlog(pool,0,"NEW USER 2",err.code);
@@ -567,23 +580,29 @@ router.post('/signin',function(req,res){
 ////////////////
 //// iscrizione torneo
 /////////////////////
-router.get('/gettorneo',function(req,res){
+router.get('/newtorneo',function(req,res){
     var pool = req.pool;
-    var id = req.session.utente;
+    var id_squadra = req.session.id_squadra;
 
-    var new_tor = "select * from Torneo where TOR_ARC is null and convert_tz(sysdate(),'-1:00','+1:00') < TOR_DATA_LIM and TOR_COD_TORNEO NOT IN ( select cod_torneo from v_torneo where cod_squadra = "+id+" )";
+    var new_tor = "select * from Torneo where TOR_ARC is null and convert_tz(sysdate(),'-1:00','+1:00') < TOR_DATA_LIM and TOR_COD_TORNEO NOT IN ( select cod_torneo from v_torneo where cod_squadra = "+id_squadra+" )";
+    
+   // console.log(new_tor);
 
     pool.getConnection(function(err,connection){
+        
         connection.query(new_tor,function(err,ris){
             connection.release();
-            if(Array.isArray(ris)) {
+            if(!ris.length) {
+                      res.redirect('/utente');
+
+            }else{
+                console.log(ris);
                 res.render('newtor',{
+                    "title" : "Aggiungi Torneo",
                     "torneo" : ris
                 });
 
-            }else{
-
-                res.redirect('/utente');
+              
             }
         });
     });
@@ -607,6 +626,7 @@ router.get('/addtorneo',function(req,res){
                     
                     connection.release();
                     res.render('addtor',{
+                        "title" : "Aggiungi Torneo",
                         "torneo" : ris,
                         "torneo2" :ris2
 

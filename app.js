@@ -8,13 +8,25 @@ var session = require('express-session')
 var fs = require('fs');
 var routes = require('./routes/index');
 var users = require('./routes/users');
+var passport = require('passport');
+var FacebookStrategy = require('passport-facebook').Strategy;
 
 var app = express();
-
+var usrlog = ('./routes/userlog.js');
 var dbfile = 'db.sk';
 var configuration = JSON.parse(fs.readFileSync(dbfile));
 
+var fbfile= 'fb.sk';
+var fbconfig = JSON.parse(fs.readFileSync(fbfile));
 
+
+
+passport.serializeUser(function(user,done){
+    done(null,user);
+});
+passport.deserializeUser(function(obj,done){
+   done(null,obj); 
+});
 
 
 
@@ -32,7 +44,8 @@ app.use(session({secret : 'provaprovaprovaprova',
                  saveUninitialized: true
                     }));
 app.use(express.static(path.join(__dirname, 'public')));
-
+app.use(passport.initialize());
+app.use(passport.session());
 
 
 var mysql = require('mysql');
@@ -51,6 +64,49 @@ app.use(function(req,res,next){
    req.pool = pool;
     next();
 });
+
+passport.use(new FacebookStrategy({
+    clientID : fbconfig.api_key,
+    clientSecret : fbconfig.api_secret,
+    callbackURL : fbconfig.callback
+},
+  function(token, refreshToken, profile, done){
+                     pool.getConnection(function(err,connection){
+                    var fbLogin = "select * from Utenti where UTE_FB_ID = "+profile.id;
+                    connection.query(fbLogin,function(err, risp){
+                            if (!risp.length){
+                                var insquery = "INSERT INTO Utenti set UTE_FB_ID = "+ profile.id;
+
+                connection.query(insquery, function (err,ris1) {
+                    if(!err){
+                        connection.query(fbLogin,function(err, usr2){
+                            connection.release();
+                            return done(null,profile);
+
+                        });
+                    }
+                });
+                            }
+                            else{
+                                connection.release();
+                                return done(null,profile);
+                            }
+                    });
+                        
+                    
+    }
+                     )}
+
+                                       ));                                     
+                                 
+        
+        app.get('/auth/facebook', passport.authenticate('facebook'));
+app.get('/facebookcall',
+
+  passport.authenticate('facebook', {failureRedirect :'/login'}),function(req,res){
+    res.redirect('/fblogin');
+}
+ );
 
 app.use('/', routes);
 app.use('/users', users);
