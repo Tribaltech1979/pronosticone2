@@ -584,11 +584,11 @@ router.post('/signin',function(req,res){
 /////////////////////
 router.get('/newtorneo',function(req,res){
     var pool = req.pool;
-    var id_squadra = req.session.id_squadra;
+    var id_squadra = req.session.utente ;
 
     var new_tor = "select * from Torneo where TOR_ARC is null and convert_tz(sysdate(),'-1:00','+1:00') < TOR_DATA_LIM and TOR_COD_TORNEO NOT IN ( select cod_torneo from v_torneo where cod_squadra = "+id_squadra+" )";
     
-   // console.log(new_tor);
+    console.log(new_tor);
 
     pool.getConnection(function(err,connection){
         
@@ -598,7 +598,7 @@ router.get('/newtorneo',function(req,res){
                       res.redirect('/utente');
 
             }else{
-                console.log(ris);
+                //console.log(ris);
                 res.render('newtor',{
                     "title" : "Aggiungi Torneo",
                     "torneo" : ris
