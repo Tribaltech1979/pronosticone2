@@ -537,12 +537,14 @@ router.post('/signin',function(req,res){
                             var upd_ute = "Update Utenti set UTE_ID_SQUADRA = "+id_squadra+" WHERE UTE_COD_UTENTE = "+id_squadra;
                             connection.query(upd_ute,function(err,ris_upd){
                                 if(!err){
+                                    connection.release();
                                     console.log("changed rows : " + ris_upd.changedRows);
                                     
                                     req.session.utente= id_squadra;
                                     res.redirect('/newtorneo');
                                 }
                                 else{
+                                    connection.release();
                                     var ulog = new usrlog(pool,0,"NEW USER 2",err.code);
                                     
                                     res.redirect('/');
