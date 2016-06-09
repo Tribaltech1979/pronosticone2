@@ -1,0 +1,53 @@
+//
+   Created by Daniele on 09/08/2015.
+
+//
+   Created by Daniele on 11/08/2015.
+extends layout
+block content
+    script(src='/javascript/ristab.js')
+    div.alert.alert-danger
+        a.close(href='#',data-dismiss='alert', aria-label='close') &times;
+        | <strong> Attenzione </strong> Bisogna correggere prima di inviare
+    div.alert.alert-success
+        a.close(href='#',data-dismiss='alert', aria-label='close') &times;
+        | <strong> Successo </strong> Salvataggio completo
+    div.alert.alert-warning
+        a.close(href='#',data-dismiss='alert', aria-label='close') &times;
+        | <strong> Attenzione </strong> problemi con il salvataggio riprovare
+block mainbar
+        table.table-responsive.table-bordered
+            thead
+                tr
+                    th Descrizione Partita
+                    th Casa
+                    th Trasferta
+                    th Risultato
+                    th Risultato
+                    th Risultato
+                    th Squadra Prevista
+                    th Squadra Prevista
+                    th Gol 1
+                    th Gol 2
+                    th Tot gol
+                    th Segno
+            tbody
+                - each item in htab
+                    tr
+                        td.GD= item.etichetta
+                        td.G1= item.sq_casa
+                        td.G2= item.sq_away
+                        td.G3= item.ris_g_casa
+                        td.G4= item.ris_g_away
+                        td.G5= item.ris_segno
+                        td.GC= item.save_sq_casa
+                        td.GH= item.save_sq_away
+                        td.G6= item.pr_g_casa
+                        td.G7= item.pr_g_away
+                        td.G11= item.pr_n_gol
+                        td.G14= item.pr_segno
+block mainleft
+    div.btn-group-vertical
+        a.btn.btn-info(href="/torneo?tid=#{cod_torneo}") Torneo
+        if next_g
+            a.btn.btn-info(href="/partita?tid=#{cod_torneo}&ngio=#{next_g}&npar=#{par}", onclick='val_next()') Successiva

@@ -184,12 +184,25 @@ this.init = function() {
                         db_query_h.getResult(function(res){
                             rows2=res;
 
+                            var next_q = "Select max(GIO_NRO_GIORNATA) as gmax from Giornate where GIO_COD_TORNEO = "+this.tid;
+                            var db_next_q = new dbw(this.pool,next_q);
 
-                                this.res.render('risultato_new',{
+                            db_next_q.getResult(function(res_max){
+
+                                var nextg = 0;
+
+                                if(res_max[0].gmax > this.ngio){
+                                    nextg = parseInt(1) + parseInt(this.ngio);
+                                }
+
+                                this.res.render('risultato_new2',{
                                     "title" : "Visualizza Pronosticone",
                                     "cod_torneo" : this.tid,
                                     "home": rows2,
+                                    "next_g" : nextg
                                 });
+
+                            }.bind(this));
                         }.bind(this)); //p_query_h
 
                 }
@@ -213,7 +226,7 @@ this.init = function() {
                             var db_next_q = new dbw(this.pool,next_q);
                             
                             db_next_q.getResult(function(res_max){
-                                
+
                                 var select_values = "select PX_VALUE 'value' from Partite_ex_val where PX_COD_TORNEO = "+this.tid;
                                 
                                 db_select_values = new dbw(this.pool,select_values);
@@ -254,22 +267,46 @@ this.init = function() {
              }
                 else{
                          /// Dopo l'inizio
-                    var p_query_h = "Select * from v_compila_2 where cod_torneo = "+this.tid+" and nro_giornata = "+this.ngio+" and pr_squadra = "+this.cod_home+" ;";
+                 var query_comp = "select * from v_compila_2 where cod_torneo = "+this.tid+" and nro_giornata = "+this.ngio+" and pr_squadra = "+this.id_squadra;
+
+                 // console.log(this.pool);
+                 //console.log(query_comp);
+
+                 var db_query_comp = new dbw(this.pool, query_comp);
+                 db_query_comp.getResult(function(res){
+                     var rows4 = res;
+
+                     //console.log(rows4);
+
+                     var next_q = "Select max(GIO_NRO_GIORNATA) as gmax from Giornate where GIO_COD_TORNEO = "+this.tid;
+                     var db_next_q = new dbw(this.pool,next_q);
+
+                     db_next_q.getResult(function(res_max){
 
 
 
-                        var db_query_h = new dbw(this.pool,p_query_h);
-                        //rows2 = db_query_h.row;
-                        db_query_h.getResult(function(res){
-                            rows2=res;
+                             var nextg = 0;
+
+                             if(res_max[0].gmax > this.ngio){
+                                 nextg = parseInt(1) + parseInt(this.ngio);
+                             }
+
+                             this.res.render('risultato_new3', {
+                                 'title': "Visualizza Pronosticone",
+                                 'htab': rows4,
+                                 'cod_torneo': this.tid,
+                                 'nro_giorn': this.ngio,
+                                 'next_g' : nextg,
+                                 'par' : this.id_squadra
+
+                             });
 
 
-                                this.res.render('risultato_new2',{
-                                    "title" : "Visualizza Pronostico",
-                                    "cod_torneo" : this.tid,
-                                    "home": rows2,
-                                });
-                        }.bind(this)); //p_query_h
+                     }.bind(this));
+
+
+
+                 }.bind(this)); //rows4
 
                 }
             }
@@ -327,22 +364,47 @@ this.init = function() {
              }
                 else{
                          /// Dopo l'inizio
-                    var p_query_h = "Select * from v_compila_2 where cod_torneo = "+this.tid+" and nro_giornata = "+this.ngio+" and pr_squadra = "+this.cod_home+" ;";
+                                /// Dopo l'inizio
+                                var query_comp = "select * from v_compila_2 where cod_torneo = "+this.tid+" and nro_giornata = "+this.ngio+" and pr_squadra = "+this.id_squadra;
+
+                                // console.log(this.pool);
+                                //console.log(query_comp);
+
+                                var db_query_comp = new dbw(this.pool, query_comp);
+                                db_query_comp.getResult(function(res){
+                                    var rows4 = res;
+
+                                    //console.log(rows4);
+
+                                    var next_q = "Select max(GIO_NRO_GIORNATA) as gmax from Giornate where GIO_COD_TORNEO = "+this.tid;
+                                    var db_next_q = new dbw(this.pool,next_q);
+
+                                    db_next_q.getResult(function(res_max){
 
 
 
-                        var db_query_h = new dbw(this.pool,p_query_h);
-                        //rows2 = db_query_h.row;
-                        db_query_h.getResult(function(res){
-                            rows2=res;
+                                        var nextg = 0;
+
+                                        if(res_max[0].gmax > this.ngio){
+                                            nextg = parseInt(1) + parseInt(this.ngio);
+                                        }
+
+                                        this.res.render('risultato_new4', {
+                                            'title': "Visualizza Pronosticone",
+                                            'htab': rows4,
+                                            'cod_torneo': this.tid,
+                                            'nro_giorn': this.ngio,
+                                            'next_g' : nextg,
+                                            'par' : this.id_squadra
+
+                                        });
 
 
-                                this.res.render('risultato_new3',{
-                                    "title" : "Visualizza Pronostico",
-                                    "cod_torneo" : this.tid,
-                                    "home": rows2,
-                                });
-                        }.bind(this)); //p_query_h
+                                    }.bind(this));
+
+
+
+                                }.bind(this)); //rows4
 
                 }
             }

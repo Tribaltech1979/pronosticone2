@@ -764,9 +764,56 @@ router.get('/torneo*', function(req, res){
         sess_tor.render();
 
     }
+    else if( req.tid == 16){
+        var sess_tor = new my_tor(res, req.pool,req.query.tid,req.session.id_squadra, null);
+        sess_tor.init();
+        sess_tor.render();
+    }
     else{
         res.redirect('/');
     }
+
+
+});
+
+router.get('/vistorneo*',function(req, res){
+    var pool = req.pool;
+    var ntid = req.query.tid;
+    var nuser = req.query.us;
+
+    pool.getConnection(function(err, connection){
+
+        var vis_torn_q = "select GIO_COD_TORNEO 'cod_torneo', GIO_NRO_GIORNATA 'nro_giornata, "+connection.escape(nuser)+"'nro_partita , GIO_ETICHETTA 'etichetta' from Giornate where GIO_COD_TORNEO = "+connection.escape(ntid);
+
+        connection.query(vis_torn_q, function(err, risultato){
+
+            if(!risultato.length){
+                connection.release();
+                res.redirect(back);
+            }
+            else {
+                var nsq = "select SQ_NOME_SQUADRA from Squadre where SQ_ID_SQUADRA = "+connection.escape(nuser);
+                connection.query(nsq, function (err, risul ) {
+                   if(!risult.length){
+                       connection.release();
+                       res.redirect(back);
+                   }
+                    else{
+                       connection.release();
+                       res.render('vis_torneo',{
+                          "title": "Visualizza pronostico di "+ risul[0].SQ_NOME_SQUADRA,
+                          "uname" : risul[0].SQ_NOME_SQUADRA,
+                          "pclass" : risultato
+                       });
+                   }
+
+                });
+            }
+
+        });
+
+
+    });
 
 
 });
