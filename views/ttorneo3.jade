@@ -4,7 +4,7 @@
 extends layout
 block content
     h1.text-left Classifica #{title} &nbsp;
-        -if idsquadra
+        if idsquadra
             div.btn-group
                 button.btn.btn-default.dropdown-toggle(data-toggle="dropdown",aria-haspopup="true",aria-expanded="false")
                     span.glyphicon.glyphicon-cog
@@ -33,6 +33,6 @@ block content
 block mainbar
     div.list-group(style="max-height: 300px; overflow-y:scroll;")
         each user, i in pclass
-            a.list-group-item(href="/vistorneo?tid=#{user.cod_torneo}&us=#{user.squadra}")
+            a.list-group-item(href="/vistorneo?tid=#{user.cod_torneo}&us=#{user.pr_squadra}")
                 //img.img-thumbnail.pull-left(src="img/#{user.image}",width="50", height="65")
                 h4.list-group-item-heading &nbsp; &nbsp; #{i+1} &nbsp; #{user.squadra} &nbsp; &nbsp; - &nbsp; &nbsp; #{user.punti}

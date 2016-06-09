@@ -759,17 +759,20 @@ router.get('/torneo*', function(req, res){
 
 
     if (req.session.id_squadra) {
+        console.log("torn 1");
         var sess_tor = new my_tor(res, req.pool,req.query.tid,req.session.id_squadra, req.session.utente);
         sess_tor.init();
         sess_tor.render();
 
     }
-    else if( req.tid == 16){
-        var sess_tor = new my_tor(res, req.pool,req.query.tid,req.session.id_squadra, null);
+    else if( req.query.tid == 16){
+        console.log("torn 2");
+        var sess_tor = new my_tor(res, req.pool,req.query.tid,req.session.id_squadra, 0);
         sess_tor.init();
         sess_tor.render();
     }
     else{
+         console.log("torn 3");
         res.redirect('/');
     }
 
@@ -783,8 +786,9 @@ router.get('/vistorneo*',function(req, res){
 
     pool.getConnection(function(err, connection){
 
-        var vis_torn_q = "select GIO_COD_TORNEO 'cod_torneo', GIO_NRO_GIORNATA 'nro_giornata, "+connection.escape(nuser)+"'nro_partita , GIO_ETICHETTA 'etichetta' from Giornate where GIO_COD_TORNEO = "+connection.escape(ntid);
+        var vis_torn_q = "select GIO_COD_TORNEO 'cod_torneo', GIO_NRO_GIORNATA 'nro_giornata' , "+connection.escape(nuser)+" as 'nro_partita' , GIO_ETICHETTA 'etichetta' from Giornate where GIO_COD_TORNEO = "+connection.escape(ntid);
 
+        console.log(vis_torn_q);
         connection.query(vis_torn_q, function(err, risultato){
 
             if(!risultato.length){
@@ -794,7 +798,7 @@ router.get('/vistorneo*',function(req, res){
             else {
                 var nsq = "select SQ_NOME_SQUADRA from Squadre where SQ_ID_SQUADRA = "+connection.escape(nuser);
                 connection.query(nsq, function (err, risul ) {
-                   if(!risult.length){
+                   if(!risul.length){
                        connection.release();
                        res.redirect(back);
                    }
@@ -863,6 +867,12 @@ router.get('/partita*', function(req, res){
         sess_par.init();
         sess_par.render();
     }
+    else if (req.query.tid == 16)
+        {
+        var sess_par = new my_par(res, pool, tid, ngio, npar,0,0);
+        sess_par.init();
+        sess_par.render();
+        }
     else{
         res.redirect('/login');
     }

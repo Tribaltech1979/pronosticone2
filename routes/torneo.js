@@ -114,7 +114,7 @@ this.init = function(){
     {
         var class_q = "Select * from classifica_ex where cod_torneo = "+tid+" order by punti desc";
         var db_class_q = new dbw(this.pool, class_q);
-
+        console.log("Torneo passo 3");
         db_class_q.getResult(function(r_clas){
           var p_clas = r_clas;
         this.res.render('ttorneo3',{

@@ -4,7 +4,7 @@
 extends layout
 block content
     h1.text-left Risultati di #{uname} &nbsp;
-        -if idsquadra
+        if idsquadra
             div.btn-group
                 button.btn.btn-default.dropdown-toggle(data-toggle="dropdown",aria-haspopup="true",aria-expanded="false")
                     span.glyphicon.glyphicon-cog
@@ -31,7 +31,7 @@ block content
                             span.glyphicon.glyphicon-off
                             |&nbsp; Logoff
 block mainbar
-    div.list-group(style="max-height: 300px; overflow-y:scroll;")
+    div.list-group(style="max-height: 900px; overflow-y:scroll;")
         each par, i in pclass
             a.list-group-item(href="/partita?tid=#{par.cod_torneo}&ngio=#{par.nro_giornata}&npar=#{par.nro_partita}")
                 h4.list-group-item-heading #{par.etichetta}

@@ -14,11 +14,11 @@ function Partita(res, pool, tid, ngio, npar, utente, id_squadra){
     this.utente = utente;
     this.id_squadra = id_squadra;
     
-    console.log("id_squadra :"+id_squadra);
+   // console.log("id_squadra :"+id_squadra);
     
     this.tipo = 0;
 
-    var check1= "SELECT if ( convert_tz(sysdate(),'-1:00','+1:00') < addtime(GIO_DATA_INIZIO, GIO_ORA_INIZIO), 1,0) as CH1, if (sysdate()> GIO_DATA_FINE,1,0) as CH2 , ifnull(GIO_TIPO,0) as tipo FROM Giornate where GIO_COD_TORNEO = "+ this.tid + " and GIO_NRO_GIORNATA = "+ this.ngio;
+    var check1= "SELECT if ( convert_tz(sysdate(),'-1:00','+1:00') < addtime(GIO_DATA_INIZIO, GIO_ORA_INIZIO), 1,0) as CH1, if (sysdate()> GIO_DATA_FINE,1,0) as CH2 , ifnull(GIO_TIPO,0) as tipo , GIO_DATA_INIZIO, GIO_ORA_INIZIO FROM Giornate where GIO_COD_TORNEO = "+ this.tid + " and GIO_NRO_GIORNATA = "+ this.ngio;
     var check2= 'SELECT * FROM Calendario where CAL_COD_TORNEO = ' + this.tid + ' and CAL_NRO_GIORNATA = '+this.ngio+' and CAL_NRO_PARTITA = '+ this.npar;
     var pron = 'SELECT * FROM v_pronostico where cod_torneo = '+this.tid+' and nro_giornata = '+this.ngio+' and pr_squadra = '+ this.id_squadra;
     //var t_query = "Select * from v_global_calen where cod_torneo = "+this.tid+" and nro_giornata = "+ this.ngio+" and nro_partita = "+this.npar+" ;";
@@ -54,6 +54,8 @@ this.init = function() {
         else{
         this.checkOrario = res[0].CH1;
         this.tipo = res[0].tipo;
+        var giorno = res[0].CAL_DATA_INIZIO ;
+        var ora = res[0].CAL_ORA_INIZIO;
 
     //this.checkOrario = this.db_check1.row[0].CH1;
         this.db_check2.getResult(function(res){
@@ -85,8 +87,10 @@ this.init = function() {
                         }.bind(this)); //rows4
                     }
                     else {
-                        res.render('aspetta', {
-                            'title': "Partita ancora da disputare"
+                        this.res.render('aspetta', {
+                            'title': "Risultati non ancora disponibili",
+                            'giorno' : giorno,
+                            'ora' : ora
                         });
                     }
                 }
@@ -150,7 +154,7 @@ this.init = function() {
                                     nextg = parseInt(1) + parseInt(this.ngio);
                                 }
                                 
-                                console.log("next g: "+nextg);
+                               // console.log("next g: "+nextg);
                                 
                                 this.res.render('compila_new', {
                                 'title': "Inserimento risultati",
@@ -168,8 +172,10 @@ this.init = function() {
                         }.bind(this)); //rows4
                     }
                     else {
-                        this.res.render('aspetta', {
-                            'title': "Partita ancora da disputare"
+                       this.res.render('aspetta', {
+                            'title': "Risultati non ancora disponibili",
+                            'giorno' : giorno,
+                            'ora' : ora
                         });
                     }
                 }
@@ -199,7 +205,8 @@ this.init = function() {
                                     "title" : "Visualizza Pronosticone",
                                     "cod_torneo" : this.tid,
                                     "home": rows2,
-                                    "next_g" : nextg
+                                    "next_g" : nextg,
+                                    "par" : this.cod_home
                                 });
 
                             }.bind(this));
@@ -258,16 +265,17 @@ this.init = function() {
                         }.bind(this)); //rows4
                  }
                  else{
-                                    
-                        this.res.render('aspetta', {
-                            'title': "Partita ancora da disputare"
+                             //console.log(res[0]);        
+                             this.res.render('aspetta', {
+                            'title': "Risultati non ancora disponibili",
+                            'giorno' : giorno,
+                            'ora' : ora
                         });
-                    
                  }
              }
                 else{
                          /// Dopo l'inizio
-                 var query_comp = "select * from v_compila_2 where cod_torneo = "+this.tid+" and nro_giornata = "+this.ngio+" and pr_squadra = "+this.id_squadra;
+                 var query_comp = "select * from v_compila_2 where cod_torneo = "+this.tid+" and nro_giornata = "+this.ngio+" and pr_squadra = "+this.cod_home;
 
                  // console.log(this.pool);
                  //console.log(query_comp);
@@ -297,7 +305,7 @@ this.init = function() {
                                  'cod_torneo': this.tid,
                                  'nro_giorn': this.ngio,
                                  'next_g' : nextg,
-                                 'par' : this.id_squadra
+                                 'par' : this.cod_home
 
                              });
 
@@ -342,7 +350,7 @@ this.init = function() {
                                 'cod_torneo': this.tid,
                                 'nro_giorn': this.ngio,
                                 'next_g' : nextg,
-                                'par' : this.id_squadra    
+                                'par' : this.cod_home  
                                     
                                 });
                                 
@@ -355,9 +363,11 @@ this.init = function() {
                         }.bind(this)); //rows4
                  }
                  else{
-                                    
-                        this.res.render('aspetta', {
-                            'title': "Partita ancora da disputare"
+                    //console.log(res[0]);            
+                       this.res.render('aspetta', {
+                            'title': "Risultati non ancora disponibili",
+                            'giorno' : giorno,
+                            'ora' : ora
                         });
                     
                  }
@@ -365,7 +375,7 @@ this.init = function() {
                 else{
                          /// Dopo l'inizio
                                 /// Dopo l'inizio
-                                var query_comp = "select * from v_compila_2 where cod_torneo = "+this.tid+" and nro_giornata = "+this.ngio+" and pr_squadra = "+this.id_squadra;
+                                var query_comp = "select * from v_compila_2 where cod_torneo = "+this.tid+" and nro_giornata = "+this.ngio+" and pr_squadra = "+this.cod_home;
 
                                 // console.log(this.pool);
                                 //console.log(query_comp);
@@ -395,7 +405,7 @@ this.init = function() {
                                             'cod_torneo': this.tid,
                                             'nro_giorn': this.ngio,
                                             'next_g' : nextg,
-                                            'par' : this.id_squadra
+                                            'par' : this.cod_home
 
                                         });
 
