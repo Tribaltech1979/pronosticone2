@@ -299,6 +299,7 @@ router.get('/fblogin*',function (req,res) {
                 //// ha la squadra, verifico il torneo
                 req.session.id = usr[0].UTE_COD_UTENTE;
                 req.session.id_squadra = usr[0].UTE_ID_SQUADRA;
+                req.session.utente = usr[0].UTE_ID_SQUADRA;
                 var chk_torneo = "SELECT count(cod_torneo) as conto from v_torneo where cod_squadra= " + req.session.id_squadra +" AND archiviato is null";
                 connection.query(chk_torneo,function(err,chk1){
                     connection.release();
@@ -586,8 +587,12 @@ router.get('/newtorneo',function(req,res){
     var pool = req.pool;
     var id_squadra = req.session.utente ;
 
+    if (req.session.utente){
     var new_tor = "select * from Torneo where TOR_ARC is null and convert_tz(sysdate(),'-1:00','+1:00') < TOR_DATA_LIM and TOR_COD_TORNEO NOT IN ( select cod_torneo from v_torneo where cod_squadra = "+id_squadra+" )";
-    
+    }
+    else{
+        res.redirect('/utente');
+    }
     console.log(new_tor);
 
     pool.getConnection(function(err,connection){
