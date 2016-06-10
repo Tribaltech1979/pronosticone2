@@ -30,8 +30,8 @@ block content
                         a(href="/logoff")
                             span.glyphicon.glyphicon-off
                             |&nbsp; Logoff
-block mainbar
-    div.list-group(style="max-height: 300px; overflow-y:scroll;")
+block mainleft
+    div.list-group(style="max-height: 900px; overflow-y:scroll;")
         each user, i in pclass
             a.list-group-item(href="/vistorneo?tid=#{user.cod_torneo}&us=#{user.pr_squadra}")
                 //img.img-thumbnail.pull-left(src="img/#{user.image}",width="50", height="65")
