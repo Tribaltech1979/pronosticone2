@@ -50,13 +50,11 @@ function invia() {
     arG4={};
     $(".G1").each(function(){
         if ($(this).val()){
-        arG1[$(this).attr("name").substr(3,6)] = $(this).val();}
-        else{
-            arG1[$(this).attr("name").substr(3,6)] = 'null';
-        }
-
+        arG1[$(this).attr("name").substr(3,6)] = $(this).val();
         arG4[count]= $(this).attr("name").substr(3,6);
         count = count +1;
+        }
+    
     });
 
     arG2={};
@@ -64,18 +62,12 @@ function invia() {
         if($(this).val()) {
             arG2[$(this).attr("name").substr(3, 6)] = $(this).val();
         }
-        else{
-            arG2[$(this).attr("name").substr(3, 6)] = 'null';
-        }
     });
 
     arG3={};
     $(".G3").each(function(){
         if($(this).val()) {
             arG3[$(this).attr("name").substr(3, 6)] = $(this).val();
-        }
-        else{
-            arG3[$(this).attr("name").substr(3, 6)] = 'null';
         }
     });
 

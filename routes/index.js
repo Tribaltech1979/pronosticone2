@@ -1215,8 +1215,12 @@ router.get('/ristorneo*', function(req, res, next) {
             connection.query(check1,function(err,rows){
 
                 if(!err) {
+                    
 
-                    connection.query(gior,function(err2,rows2) {
+                    
+                    if (rows[0].TOR_TIPO_TORNEO != 4){
+                        
+                        connection.query(gior,function(err2,rows2) {
 
                         connection.release();
                         if(!err2) {
@@ -1226,6 +1230,25 @@ router.get('/ristorneo*', function(req, res, next) {
                             });
                         }
                     });
+                    }
+                    else{
+                        var gior4 = "select * from v_insris where cod_torneo = "+tid+" and g_home is null ;";
+                        
+                        connection.query(gior4,function(err3, row3){
+                           connection.release();
+                            if(!row3.length){
+                                res.redirect(back);
+                            }
+                            else{
+                                res.render('insertris',{
+                                   "list":row3,
+                                    "descr": rows[0].TOR_DESCR_TORNEO
+                                });
+                            }
+                        });
+                    }
+
+
                 }
                 else{
                     connection.release();
@@ -1250,16 +1273,27 @@ router.post('/salvaris',function(req,res){
     var t1 = JSON.parse(req.body.tab1);
     var t2 = JSON.parse(req.body.tab2);
     var t3 = JSON.parse(req.body.tab3);
-    var t4 = JSON.parse(req.body.tab3);
+    var t4 = {};
+     t4 = JSON.parse(req.body.tab4);
+    
+    var arr= Object.keys(t4).map(function(k){return t4[k]});
+    
+   // console.log(t1);
+   // console.log(t2);
+    //console.log(t3);
+    console.log(arr.length);
 
     var uquery = '';
     var count;
-    for(count = 0; count < t4.length; count++){
+    for(count = 0; count < arr.length; count++){
         var part = t4[count];
         var upd = 'UPDATE Partite set PAR_GOL_HOME = '+t1[part]+' , PAR_GOL_AWAY = '+t2[part]+' , PAR_SEGNO = '+t3[part]+' WHERE PAR_COD_PARTITA = '+part+' ;';
 
         uquery = uquery + upd;
+         console.log(uquery);
     }
+    
+   
 
     pool.getConnection(function(err,connection){
         if (err) {
