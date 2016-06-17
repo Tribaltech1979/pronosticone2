@@ -113,17 +113,26 @@ this.init = function(){
     else if (this.tipo_torneo == 4)
     {
         var class_q = "Select * from classifica_ex where cod_torneo = "+tid+" order by punti desc";
+        var stat_q = "select * from v_stat_segno where cod_torneo = "+tid+" and data IN ( date(sysdate()), date(sysdate())+1) order by data asc, cod_partita asc, perc desc";
         var db_class_q = new dbw(this.pool, class_q);
-        console.log("Torneo passo 3");
+        //console.log("Torneo passo 3");
         db_class_q.getResult(function(r_clas){
-          var p_clas = r_clas;
-        this.res.render('ttorneo3',{
+            var p_clas = r_clas;
+        var db_stat_q = new dbw(this.pool, stat_q);
+            
+            db_stat_q.getResult(function(stat){
+                
+            this.res.render('ttorneo3',{
             "title" : this.title,
             "image" : this.image,
             "tid": this.tid,
             "idsquadra" : this.id_squadra,
-            "pclass" :p_clas
-        });
+            "pclass" :p_clas,
+            "stat" : stat
+            });
+                
+            }.bind(this)); // STAT
+
     }.bind(this));// class query
     }
     }.bind(this));//row1

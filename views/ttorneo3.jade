@@ -36,3 +36,22 @@ block mainleft
             a.list-group-item(href="/vistorneo?tid=#{user.cod_torneo}&us=#{user.pr_squadra}")
                 //img.img-thumbnail.pull-left(src="img/#{user.image}",width="50", height="65")
                 h4.list-group-item-heading &nbsp; &nbsp; #{i+1} &nbsp; #{user.squadra} &nbsp; &nbsp; - &nbsp; &nbsp; #{user.punti}
+block mainright
+    div.panel.panel-default
+        div.panel-heading
+            if stat
+                h3.panel-title #{stat[0].t_home} v #{stat[0].t_away}
+            div.panel-body
+                -var part = stat[0].cod_partita
+                ul.list-group
+                    li.list-group-item
+                        span.badge #{stat[0].perc} %
+                        | #{stat[0].segno}
+                    if part == stat[1].cod_partita
+                        li.list-group-item
+                            span.badge #{stat[1].perc} %
+                            | #{stat[1].segno}
+                    if part == stat[2].cod_partita
+                        li.list-group-item
+                            span.badge #{stat[2].perc} %
+                            | #{stat[2].segno}
