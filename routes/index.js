@@ -886,6 +886,24 @@ router.get('/partita*', function(req, res){
 
 });
 
+router.get('/stati*', function(req,res){
+   var pool = req.pool;
+   var tid = req.query.tid;
+    
+    var stat_q = "select * from v_stat_segno where cod_torneo = "+tid+" and data IN ( date(sysdate()), date(sysdate())+1) order by data asc, cod_partita asc, perc desc";
+    
+    var db_stat_q = new dbw(pool, stat_q);
+    
+    db_stat_q.getResult(function(stat){
+        res.render('stati',{
+            "stat" : stat,
+            "tid" : tid
+        })
+    });
+    
+    
+});
+
 
 
 

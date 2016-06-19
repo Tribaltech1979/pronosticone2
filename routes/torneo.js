@@ -128,7 +128,8 @@ this.init = function(){
             "tid": this.tid,
             "idsquadra" : this.id_squadra,
             "pclass" :p_clas,
-            "stat" : stat
+            "stat" : stat,
+            "tid" : tid
             });
                 
             }.bind(this)); // STAT
