@@ -896,7 +896,9 @@ router.get('/stati*', function(req,res){
     
     db_stat_q.getResult(function(stat){
         res.render('stati',{
-            "stat" : stat,
+            "statis1" : stat,
+            "statis2" : stat,
+            "id_squadra" : req.session.id_squadra,
             "tid" : tid
         })
     });

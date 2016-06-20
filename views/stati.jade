@@ -1,0 +1,45 @@
+//
+   Created by schiappacassed on 06/06/2016.
+
+extends layout
+block content
+    h1.text-left Statistiche risultati per #{title} &nbsp;
+        if idsquadra
+            div.btn-group
+                button.btn.btn-default.dropdown-toggle(data-toggle="dropdown",aria-haspopup="true",aria-expanded="false")
+                    span.glyphicon.glyphicon-cog
+                ul.dropdown-menu
+                    li
+                        a(href="/utente")
+                            span.fa.fa-home
+                            |&nbsp; Principale
+                    li
+                        a(href="/addtorneo")
+                            span.glyphicon.glyphicon-plus-sign
+                            |&nbsp; Aggiungi Torneo
+                    li
+                        a(href="/gestsq")
+                            span.glyphicon.glyphicon-list
+                            |&nbsp; Opzioni
+                    li
+                        a(href="/cambiop")
+                            span.glyphicon.glyphicon-sunglasses
+                            |&nbsp; Cambio Password
+                    li.divider(role="separator")
+                    li
+                        a(href="/logoff")
+                            span.glyphicon.glyphicon-off
+                            |&nbsp; Logoff
+block mainbar
+    each stat in statis1
+        div.panel.panel-default
+            div.panel-heading
+                h3.panel-title #{stat[0].t_home} v #{stat[0].t_away}
+            div.panel-body
+                    -var part = stat.cod_partita
+                    ul.list-group
+                        each stati in statis2
+                            -if part == stati.cod_partita
+                                li.list-group-item
+                                    span.badge #{stati.perc} %
+                                    | #{stati.segno}
