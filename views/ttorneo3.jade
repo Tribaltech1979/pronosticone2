@@ -39,7 +39,9 @@ block mainleft
 block mainright
     div.panel.panel-default
         div.panel-heading
-            if stat
+            -if (!stat){
+                h3.panel-title Nessuna partita in calendario.
+            -}else{
                 h3.panel-title #{stat[0].t_home} v #{stat[0].t_away}
             div.panel-body
                 -var part = stat[0].cod_partita
@@ -56,3 +58,4 @@ block mainright
                             span.badge #{stat[2].perc} %
                             | #{stat[2].segno}
                 a(href="/stati?tid=#{tid}") Guarda tutte le statistiche
+            -}

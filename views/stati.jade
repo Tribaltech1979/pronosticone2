@@ -31,15 +31,19 @@ block content
                             span.glyphicon.glyphicon-off
                             |&nbsp; Logoff
 block mainbar
+    -var part = 0
     each stat in statis1
+        -if (stat.cod_partita != part){
         div.panel.panel-default
             div.panel-heading
-                h3.panel-title #{stat[0].t_home} v #{stat[0].t_away}
+                h3.panel-title #{stat.t_home} v #{stat.t_away}
             div.panel-body
-                    -var part = stat.cod_partita
+                    -part = stat.cod_partita
                     ul.list-group
                         each stati in statis2
-                            -if part == stati.cod_partita
+                            -if (part == stati.cod_partita) {
                                 li.list-group-item
                                     span.badge #{stati.perc} %
                                     | #{stati.segno}
+                            -}
+        -}
