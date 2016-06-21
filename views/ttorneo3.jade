@@ -3,6 +3,7 @@
 
 extends layout
 block content
+    script(type="text/javascript",src="http://ads.williamhill.it/ad.aspx?pid=191299251&bid=1487411170&lpid=1471672153")
     h1.text-left Classifica #{title} &nbsp;
         if idsquadra
             div.btn-group
@@ -30,6 +31,7 @@ block content
                         a(href="/logoff")
                             span.glyphicon.glyphicon-off
                             |&nbsp; Logoff
+block mainbar
 block mainleft
     div.list-group(style="max-height: 900px; overflow-y:scroll;")
         each user, i in pclass
