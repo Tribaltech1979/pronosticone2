@@ -890,8 +890,7 @@ router.get('/stati*', function(req,res){
    var pool = req.pool;
    var tid = req.query.tid;
     
-    var stat_q = "select * from v_stat_segno where cod_torneo = "+tid+" and data IN ( date(sysdate()), date(sysdate())+1) order by data asc, cod_partita asc, perc desc";
-    
+var  stat_q = "select * from v_stat_segno where cod_torneo = "+tid+" and data IN ( date(sysdate()), date(sysdate())+1, date(sysdate())+2, date(sysdate())+3) order by data asc, cod_partita asc, perc desc";
     var db_stat_q = new dbw(pool, stat_q);
     
     db_stat_q.getResult(function(stat){
