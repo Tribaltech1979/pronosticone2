@@ -41,7 +41,7 @@ block mainleft
 block mainright
     div.panel.panel-default
         div.panel-heading
-            -if (!stat){
+            -if (!test){
                 h3.panel-title Nessuna partita in calendario.
             -}else{
                 h3.panel-title #{stat[0].t_home} v #{stat[0].t_away}

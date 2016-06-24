@@ -129,6 +129,7 @@ this.init = function(){
             "idsquadra" : this.id_squadra,
             "pclass" :p_clas,
             "stat" : stat,
+            "test" : stat.length,   
             "tid" : tid
             });
                 
