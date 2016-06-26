@@ -39,6 +39,56 @@ block mainleft
                 //img.img-thumbnail.pull-left(src="img/#{user.image}",width="50", height="65")
                 h4.list-group-item-heading &nbsp; &nbsp; #{i+1} &nbsp; #{user.squadra} &nbsp; &nbsp; - &nbsp; &nbsp; #{user.punti}
 block mainright
+    if idsquadra
+        input(type='hidden', name='torneo', value="#{tid}")
+        input(type='hidden', name='nick', value="#{nick}")
+        input(type='hidden', name='id', value="#{idsquadra}")
+        div.panel.panel-default
+            div.panel-body(id="chatpan", style="height : 200px; overflow-y: scroll;")
+                ul.list-group(id = "chat")
+            div.panel-footer
+                form(action = "")
+                    input(id = "m", autocomplete="off", style=" border: 0; padding: 10px; width: 90%; margin-right: .5%;")
+                    button(style="width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px;") Invia
+        script(src="https://cdn.socket.io/socket.io-1.2.0.js")        
+        script.
+            var tid = $("input").filter("[name='torneo']").val();
+            var nick = $("input").filter("[name='nick']").val();
+            var id = $("input").filter("[name='id']").val();
+            var socket = io();
+            $.get("/getchat/"+tid, function(msg){
+            var i;
+            console.log(msg);
+            for(i=0; i < msg.length; i++){
+             $('#chat').append(
+            $('<li>').addClass('list-group-item').append(
+            $('<strong>').append(msg[i].UTE_NICK+ " : ")).append(msg[i].MSG));
+            }
+            
+            $('#chatpan').scrollTop($('ul li').last().position().top + $('ul li').last().height());
+            
+            });
+            
+            socket.emit('join',{"id": socket.id, "tid" : tid});
+            $('form').submit(function(){
+            if  ($('#m').val()){
+            socket.emit('chat message', {"msg" :$('#m').val(),"nick": nick,"id" :id, "tid": tid });
+            $('#m').val('');  
+            }
+
+            return false;
+            });
+            socket.on('chat message', function(msg){
+            $('#chat').append(
+            $('<li>').addClass('list-group-item').append(
+            $('<strong>').append(msg.nick+ " : ")).append(msg.msg));
+            
+            $('#chatpan').scrollTop($('ul li').last().position().top + $('ul li').last().height());
+            });
+    else
+        div.panel.panel-default
+            div.panel-body(style="height : 200px; overflow-y: scroll;")
+                h3 Fai login per inserire un commento
     div.panel.panel-default
         div.panel-heading
             -if (!test){

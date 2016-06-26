@@ -10,6 +10,7 @@ var routes = require('./routes/index');
 var users = require('./routes/users');
 var passport = require('passport');
 var FacebookStrategy = require('passport-facebook').Strategy;
+//var http = require('http').Server(app);
 
 var app = express();
 var usrlog = ('./routes/userlog.js');
@@ -21,6 +22,9 @@ var fbconfig = JSON.parse(fs.readFileSync(fbfile));
 
 
 
+
+
+///// Passport
 passport.serializeUser(function(user,done){
     done(null,user);
 });
@@ -65,6 +69,11 @@ app.use(function(req,res,next){
     next();
 });
 
+
+
+////// FINE SOCKET IO
+
+/////// PASSPORT
 passport.use(new FacebookStrategy({
     clientID : fbconfig.api_key,
     clientSecret : fbconfig.api_secret,
@@ -107,6 +116,8 @@ app.get('/facebookcall',
     res.redirect('/fblogin');
 }
  );
+////// FINE PASSPORT
+
 
 app.use('/', routes);
 app.use('/users', users);
@@ -143,4 +154,4 @@ app.use(function(err, req, res, next) {
 });
 
 
-module.exports = app;
+module.exports = {app, pool};

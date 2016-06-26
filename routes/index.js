@@ -712,6 +712,28 @@ router.get('/addtor*',function(req,res){
        
 });
 });
+/////////
+//// CHAT
+/////
+router.get('/getchat/:tid', function(req,res){
+    var pool= req.pool;
+    var tid = req.params.tid;
+    
+    var chat_q = "Select * from Chat where TID = "+tid+" LIMIT 20";
+    
+    pool.getConnection(function(err, connection){
+        connection.query(chat_q, function(err, rows){
+            connection.release();
+            
+            res.json(rows);
+        }) ;
+    });
+    
+});
+
+
+
+
 ///////////////////
 //// CAMBIO IMAGE
 ///////////////////
@@ -763,6 +785,7 @@ router.get('/logoff', function(req,res){
 router.get('/torneo*', function(req, res){
 
 
+if(req.query.tid){    
     if (req.session.id_squadra) {
         console.log("torn 1");
         var sess_tor = new my_tor(res, req.pool,req.query.tid,req.session.id_squadra, req.session.utente);
@@ -780,7 +803,8 @@ router.get('/torneo*', function(req, res){
          console.log("torn 3");
         res.redirect('/');
     }
-
+}
+    else{res.redirect(back);}
 
 });
 

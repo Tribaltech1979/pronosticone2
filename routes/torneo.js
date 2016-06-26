@@ -122,17 +122,46 @@ this.init = function(){
             
             db_stat_q.getResult(function(stat){
                 
-            this.res.render('ttorneo3',{
-            "title" : this.title,
-            "image" : this.image,
-            "tid": this.tid,
-            "idsquadra" : this.id_squadra,
-            "pclass" :p_clas,
-            "stat" : stat,
-            "test" : stat.length,   
-            "tid" : tid
-            });
+            if(this.id_squadra){
                 
+                var nick;
+                var nick_q = "select * from Squadre where SQ_ID_SQUADRA = "+this.id_squadra;
+                var db_nick_q = new dbw(this.pool, nick_q);
+                
+                db_nick_q.getResult(function(nick_res){
+                    
+                    nick = nick_res[0].SQ_NOME_SQUADRA;
+                    
+                    this.res.render('ttorneo3',{
+                    "title" : this.title,
+                    "image" : this.image,
+                    "tid": this.tid,
+                    "idsquadra" : this.id_squadra,
+                    "pclass" :p_clas,
+                    "stat" : stat,
+                    "test" : stat.length,   
+                    "tid" : tid,
+                    "nick" : nick    
+                    });
+                }.bind(this) //nick
+                    );
+                
+
+                
+            }
+                else{
+                    this.res.render('ttorneo3',{
+                    "title" : this.title,
+                    "image" : this.image,
+                    "tid": this.tid,
+                    "idsquadra" : this.id_squadra,
+                    "pclass" :p_clas,
+                    "stat" : stat,
+                    "test" : stat.length,   
+                    "tid" : tid,
+                    "nick" : null   
+                    });
+                }
             }.bind(this)); // STAT
 
     }.bind(this));// class query
